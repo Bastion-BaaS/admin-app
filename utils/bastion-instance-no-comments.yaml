@@ -15,9 +15,14 @@ Parameters:
     Type: String
   SGDBServer:
     Type: String
+  ALBListener:
+    Type: String
   NewNameSpace:
     Type: String
     Default: bastion
+  ListenerRulePriority:
+    Type: Number 
+    Default: 2
 Resources:
   BaaSECSCluster:
     Type: 'AWS::ECS::Cluster'
@@ -48,12 +53,18 @@ Resources:
             -  !Ref AppTierSubnet 
           SecurityGroups:
             - !Ref AppServerSecurityGroup
+      LoadBalancers:
+        - ContainerPort: 3001
+          ContainerName: app-server 
+          TargetGroupArn:
+            Ref: AppServerTargetGroup
     DependsOn:
       - AppServerTask
       - AppServerServiceDiscoveryEntry
       - BaaSECSCluster
       - AppServerSecurityGroup
       - DatabaseECSService
+      - AppServerTargetGroup
   AppServerTask:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
@@ -72,7 +83,7 @@ Resources:
       ContainerDefinitions:
         - Name: app-server
           Essential: 'true'
-          Image: 'public.ecr.aws/y7d9d7k6/app-server:0.4.0'
+          Image: 'public.ecr.aws/y7d9d7k6/app-server:0.5.0'
           PortMappings:
             - ContainerPort: 3001
               HostPort: 3001
@@ -290,3 +301,29 @@ Resources:
       SubnetId: !Ref AppTierSubnet 
     DependsOn:
       - InstanceEFS
+  AppServerTargetGroup:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      VpcId: !Ref VPCID
+      Name: AppServerTargetGroup
+      HealthCheckEnabled: true
+      Port: 3001
+      Protocol: HTTP
+      TargetType: ip
+  AppServerALBListenerRule:
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: !Ref ListenerRulePriority
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - /server/*
+      Actions:
+        - Type: forward
+          ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn: !Ref AppServerTargetGroup
+                Weight: 1
+    

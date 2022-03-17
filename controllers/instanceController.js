@@ -30,6 +30,10 @@ const createBaaS = (req, res, next) => {
         ParameterValue: process.env.SGAppServer
       },
       {
+        ParameterKey: 'ALBListener',
+        ParameterValue: process.env.ALBListener
+      },
+      {
         ParameterKey: 'SGDBServer',
         ParameterValue: process.env.SGDBServer
       }

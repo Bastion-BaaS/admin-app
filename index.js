@@ -21,7 +21,8 @@ const env = (req, res, next) => {
     AppServerIAMRole: process.env.AppServerIAMRole,
     DBServerIAMRole: process.env.DBServerIAMRole,
     AppServerIAMRoleArn: process.env.AppServerIAMRoleArn,
-    DBServerIAMRoleArn: process.env.DBServerIAMRoleArn
+    DBServerIAMRoleArn: process.env.DBServerIAMRoleArn,
+    ALBListener: process.env.ALBListener
   };
   res.json(envVars);
 }
@@ -42,10 +43,13 @@ const app = express();
 app.use(express.json());
 
 app.get('/', test);
+app.get('/admin/', test);
 app.get('/env', env);
+app.get('/admin/env', env);
 app.get('/db', db);
+app.get('/admin/db', db);
 
-app.use('/instances', instanceRoutes);
-app.use('/db', dbRoutes);
+app.use('/admin/instances', instanceRoutes);
+app.use('/admin/db', dbRoutes);
 
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
