@@ -12,6 +12,26 @@ const createBaaS = (req, res, next) => {
       {
         ParameterKey: 'VPCID',
         ParameterValue: process.env.VpcId
+      },
+      {
+        ParameterKey: 'AppTierSubnet',
+        ParameterValue: process.env.AppTierSubnet
+      },
+      {
+        ParameterKey: 'DBTierSubnet',
+        ParameterValue: process.env.DBTierSubnet
+      },
+      {
+        ParameterKey: 'EFSSecurityGroup',
+        ParameterValue: process.env.EFSSecurityGroup
+      },
+      {
+        ParameterKey: 'SGAppServer',
+        ParameterValue: process.env.SGAppServer
+      },
+      {
+        ParameterKey: 'SGDBServer',
+        ParameterValue: process.env.SGDBServer
       }
     ],
     Capabilities: ['CAPABILITY_NAMED_IAM']
@@ -25,15 +45,6 @@ const createBaaS = (req, res, next) => {
     return res.status(200).json(data);
   });
 };
-
-const testfs = (req, res, next) => {
-  try {
-    const template = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-instance-no-comments.yaml'), 'utf8');
-    res.send(template);
-  } catch (err) {
-    res.send(err);
-  }
-}
 
 const destroyBaaS = (req, res, next) => {
   const body = req.body;
@@ -75,4 +86,3 @@ exports.createBaaS = createBaaS;
 exports.destroyBaaS = destroyBaaS;
 exports.getBaaSInstances = getBaaSInstances;
 exports.getBaaSInstance = getBaaSInstance;
-exports.testfs = testfs;
