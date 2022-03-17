@@ -1,0 +1,288 @@
+# This script expects a VPC
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  VPCID:
+    Type: String
+    Default: vpc-0f68bb98e09721e27
+  SubnetID:
+    Type: String
+    Default: subnet-044c39a647c192895
+Resources:
+  BaaSECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      CapacityProviders:
+        - FARGATE
+      ClusterName: BaaSECSCluster
+    DependsOn:
+      - CloudWatchLogsGroup
+  AppServerECSService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: !Ref BaaSECSCluster
+      DesiredCount: 1
+      DeploymentConfiguration:
+        MaximumPercent: 100
+        MinimumHealthyPercent: 0
+      TaskDefinition: !Ref AppServerTask
+      LaunchType: FARGATE
+      ServiceRegistries:
+        - RegistryArn: !GetAtt 
+            - AppServerServiceDiscoveryEntry
+            - Arn
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref SubnetID
+          SecurityGroups:
+            - !Ref AppServerSecurityGroup
+    DependsOn:
+      - AppServerTask
+      - AppServerServiceDiscoveryEntry
+      - BaaSECSCluster
+      - AppServerSecurityGroup
+      - DatabaseECSService
+  AppServerTask:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !GetAtt 
+        - AppServerTaskRole
+        - Arn
+      TaskRoleArn: !GetAtt 
+        - AppServerTaskRole
+        - Arn
+      RequiresCompatibilities:
+        - FARGATE
+      Family: fargate-task-definition
+      Cpu: '256'
+      Memory: '512'
+      ContainerDefinitions:
+        - Name: app-server
+          Essential: 'true'
+          Image: 'public.ecr.aws/y7d9d7k6/app-server:0.3.0'
+          PortMappings:
+            - ContainerPort: 3001
+              HostPort: 3001
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: ecs
+    DependsOn:
+      - BaaSECSCluster
+      - CloudWatchLogsGroup
+      - AppServerTaskRole
+  # To be moved to infra CF
+  AppServerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 30000
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 30000
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPCID
+      GroupDescription: Test
+  # To be moved to infra CF
+  AppServerTaskRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: AppServerTaskRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+  DatabaseECSService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: !Ref BaaSECSCluster
+      DesiredCount: 1
+      DeploymentConfiguration:
+        MaximumPercent: 100
+        MinimumHealthyPercent: 0
+      TaskDefinition: !Ref DatabaseTask
+      LaunchType: FARGATE
+      ServiceRegistries:
+        - RegistryArn: !GetAtt 
+            - DatabaseServiceDiscoveryEntry
+            - Arn
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !Ref SubnetID
+          SecurityGroups:
+            - !Ref DatabaseSecurityGroup
+    DependsOn:
+      - DatabaseServiceDiscoveryEntry
+      - DatabaseTask
+      - BaaSECSCluster
+      - DatabaseSecurityGroup
+  DatabaseTask:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !GetAtt 
+        - DatabaseTaskRole
+        - Arn
+      TaskRoleArn: !GetAtt 
+        - DatabaseTaskRole
+        - Arn
+      RequiresCompatibilities:
+        - FARGATE
+      Family: fargate-task-definition
+      Cpu: '256'
+      Memory: '512'
+      ContainerDefinitions:
+        - Name: mongo
+          Essential: true
+          Image: 'mongo:latest'
+          PortMappings:
+            - ContainerPort: 27017
+              HostPort: 27017
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: ecs
+          MountPoints:
+            - ContainerPath: /data/db
+              SourceVolume: mongo-efs-volume
+      Volumes:
+        - Name: mongo-efs-volume
+          EFSVolumeConfiguration:
+            FilesystemId: !Ref InstanceEFS
+    DependsOn:
+      - BaaSECSCluster
+      - DatabaseTaskRole
+      - InstanceEFS
+      - MountTarget
+  # To be moved to infra CF
+  DatabaseSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 30000
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 30000
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPCID
+      GroupDescription: Test
+  # To be moved to infra CF
+  DatabaseTaskRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: DatabaseTaskRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+  BaaSNameSpace:
+    Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
+    Properties:
+      Description: Service Discovery Namespace for BaaS Instance
+      Vpc: !Ref VPCID
+      Name: bastion
+  AppServerServiceDiscoveryEntry:
+    Type: 'AWS::ServiceDiscovery::Service'
+    Properties:
+      Name: app-server
+      DnsConfig:
+        DnsRecords:
+          - Type: A
+            TTL: '10'
+        NamespaceId: !Ref BaaSNameSpace
+      HealthCheckCustomConfig:
+        FailureThreshold: '1'
+    DependsOn:
+      - BaaSNameSpace
+  DatabaseServiceDiscoveryEntry:
+    Type: 'AWS::ServiceDiscovery::Service'
+    Properties:
+      Name: db
+      DnsConfig:
+        DnsRecords:
+          - Type: A
+            TTL: '10'
+        NamespaceId: !Ref BaaSNameSpace
+      HealthCheckCustomConfig:
+        FailureThreshold: '1'
+    DependsOn:
+      - BaaSNameSpace
+  CloudWatchLogsGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Ref 'AWS::StackName'
+      RetentionInDays: 7
+  # To be moved to infra CF
+  InstanceEFS:
+    Type: 'AWS::EFS::FileSystem'
+    Properties:
+      Encrypted: true
+      PerformanceMode: generalPurpose
+  # To be moved to infra CF
+  EFSSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 30000
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 30000
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPCID
+      GroupDescription: Test
+  MountTarget:
+    Type: 'AWS::EFS::MountTarget'
+    Properties:
+      FileSystemId: !Ref InstanceEFS
+      SecurityGroups:
+        - !Ref EFSSecurityGroup
+      SubnetId: !Ref SubnetID
+    DependsOn:
+      - InstanceEFS
+      - EFSSecurityGroup
