@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const instanceSchema = new mongoose.Schema({
     StackName: {
-        type: String
+        type: String,
+        required: [true, 'The StackName is required']
     },
     StackId: {
         type: String,

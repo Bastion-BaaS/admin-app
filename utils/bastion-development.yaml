@@ -23,6 +23,9 @@ Parameters:
   ListenerRulePriority:
     Type: Number 
     Default: 2
+  TargetGroupName:
+    Type: String 
+    Default: AppServerTargetGroup
 Resources:
   BaaSECSCluster:
     Type: 'AWS::ECS::Cluster'
@@ -305,7 +308,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
     Properties:
       VpcId: !Ref VPCID
-      Name: AppServerTargetGroup
+      Name: !Ref TargetGroupName
       HealthCheckEnabled: true
       Port: 3001
       Protocol: HTTP
