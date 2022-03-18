@@ -7,6 +7,4 @@ instanceRouter.delete('/destroyBaaS/:id', instanceController.destroyBaaS);
 instanceRouter.get('/getBaaSInstances', instanceController.getBaaSInstances);
 instanceRouter.get('/getBaaSInstance/:id', instanceController.getBaaSInstance);
 
-instanceRouter.get('/testfs', instanceController.testfs);
-
 module.exports = instanceRouter;

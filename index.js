@@ -21,10 +21,13 @@ const env = (req, res, next) => {
     AppServerIAMRole: process.env.AppServerIAMRole,
     DBServerIAMRole: process.env.DBServerIAMRole,
     AppServerIAMRoleArn: process.env.AppServerIAMRoleArn,
-    DBServerIAMRoleArn: process.env.DBServerIAMRoleArn
+    DBServerIAMRoleArn: process.env.DBServerIAMRoleArn,
+    ALBListener: process.env.ALBListener
   };
   res.json(envVars);
 }
+
+const Cat = mongoose.model('Cat', { name: String });
 
 const db = (req, res, next) => {
   mongoose.connect('mongodb://localhost:27017')
@@ -38,14 +41,45 @@ const db = (req, res, next) => {
     });
 }
 
+const addCat = (req, res, next) => {
+  const kitty = new Cat({ name: 'Pavlo' });
+  console.log('in test route');
+  kitty.save()
+    .then(response => {
+      console.log(response);
+      res.send(response);
+    })
+    .catch(error => {
+      console.log(error);
+      res.send(error);
+    });
+}
+
+const findCats = (req, res, next) => {
+  Cat.find({})
+    .then(response => {
+      console.log(response);
+      res.json(response);
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(418).send();
+    });
+}
+
 const app = express();
 app.use(express.json());
 
 app.get('/', test);
+app.get('/admin/', test);
 app.get('/env', env);
+app.get('/admin/env', env);
 app.get('/db', db);
+app.get('/admin/db', db);
+app.get('/admin/addCat', addCat);
+app.get('/admin/findCats', findCats);
 
-app.use('/instances', instanceRoutes);
-app.use('/db', dbRoutes);
+app.use('/admin/instances', instanceRoutes);
+app.use('/admin/db', dbRoutes);
 
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
