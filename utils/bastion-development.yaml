@@ -267,11 +267,6 @@ Resources:
         FailureThreshold: '1'
     DependsOn:
       - BaaSNameSpace
-  AppServerLG:
-    Type: 'AWS::Logs::LogGroup'
-    Properties:
-      LogGroupName: !Ref 'AWS::StackName'
-      RetentionInDays: 14
   InstanceEFS:
     Type: 'AWS::EFS::FileSystem'
     Properties:

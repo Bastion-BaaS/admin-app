@@ -36,6 +36,10 @@ const createBaaS = (req, res, next) => {
       {
         ParameterKey: 'SGDBServer',
         ParameterValue: process.env.SGDBServer
+      },
+      {
+        ParameterKey: 'AppServerLG',
+        ParameterValue: process.env.AppServerLG
       }
     ],
     Capabilities: ['CAPABILITY_NAMED_IAM']
