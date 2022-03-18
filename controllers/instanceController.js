@@ -4,10 +4,50 @@ const path = require('path');
 const cloudformation = new aws.CloudFormation();
 
 const Instance = require('../models/instance');
-const cloudformation = new aws.CloudFormation();
+const RulePriority = require('../models/listenerRulesPriority');
 
-const createBaaS = (req, res, next) => {
-  const template = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-development.yaml'), 'utf8');
+const newRulePriority = () => {
+  return new Promise((resolve, reject) => {
+    RulePriority.findOne({})
+      .then(rulePriority => {
+        const current = rulePriority.Current;
+        const newValue = current + 1;
+
+        RulePriority.findOneAndUpdate({}, { Current: newValue })
+          .then(() => {
+            resolve([false, newValue]);
+          })
+          .catch(err => {
+            console.log(err);
+            reject([err, null]);
+          })
+      })
+      .catch(err => {
+        console.log(err);
+        reject([err, null]);
+      });
+  });
+};
+
+const createBaaS = async (req, res, next) => {
+  const StackName = req.body.StackName;
+  const TargetGroupName = StackName + 'TargetGroup';
+  const TemplateBody = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-development.yaml'), 'utf8');
+  let rulePriority;
+
+  try {
+    rulePriority = await newRulePriority()
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send(err);
+  }
+
+  const [ err, rulePriorityValue ] = rulePriority;
+  if (err) {
+    console.log(err);
+    return res.status(400).send(err);
+  }
+
   const params = {
     StackName,
     TemplateBody,
@@ -43,6 +83,14 @@ const createBaaS = (req, res, next) => {
       {
         ParameterKey: 'AppServerLG',
         ParameterValue: process.env.AppServerLG
+      },
+      {
+        ParameterKey: 'ListenerRulePriority',
+        ParameterValue: String(rulePriorityValue)
+      },
+      {
+        ParameterKey: 'TargetGroupName',
+        ParameterValue: TargetGroupName
       }
     ],
     Capabilities: ['CAPABILITY_NAMED_IAM']
@@ -80,8 +128,15 @@ const destroyBaaS = (req, res, next) => {
         if (err) {
           return res.status(400).send(err);
         }
-
-        return res.status(200).json(data);
+        
+        Instance.findByIdAndDelete(req.params.id)
+          .then(result => {
+            res.status(200).json(result);
+          })
+          .catch(err => {
+            console.log(err);
+            res.status(400).send(err);
+          });
       });
     })
     .catch(err => {

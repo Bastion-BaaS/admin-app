@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 
 const instanceRoutes = require('./routes/instanceRouter');
 const dbRoutes = require('./routes/dbRouter');
+const RulePriority = require('./models/listenerRulesPriority');
+const Cat = mongoose.model('Cat', { name: String });
 
 const PORT = 3001;
 
@@ -28,13 +30,32 @@ const env = (req, res, next) => {
   res.json(envVars);
 }
 
-const Cat = mongoose.model('Cat', { name: String });
-
 const db = (req, res, next) => {
   mongoose.connect('mongodb://localhost:27017')
     .then(result => {
-      console.log('connected to mongo');
-      res.json({ status: 'connected' });
+      RulePriority.find({})
+        .then(rulePriority => {
+          if (rulePriority.length !== 0) {
+            // if a rule priority exists, do nothing
+            console.log('connected to mongo');
+            res.json({ status: 'connected' })
+          } else {
+            // if no rule priority exists, make one with value of 2
+            RulePriority.create({ Current: 2 })
+              .then(() => {
+                console.log('connected to mongo');
+                res.json({ status: 'connected' });
+              })
+              .catch(err => {
+                console.log(err);
+                res.send(err);
+              });
+          }
+        })
+        .catch(err => {
+          console.log(err);
+          res.send(err);
+        })
     })
     .catch(error => {
       console.log(error);
@@ -54,7 +75,7 @@ const addCat = (req, res, next) => {
       console.log(error);
       res.send(error);
     });
-}
+};
 
 const findCats = (req, res, next) => {
   Cat.find({})
@@ -66,19 +87,27 @@ const findCats = (req, res, next) => {
       console.log(error);
       res.status(418).send();
     });
-}
+};
+
+const resetRulePriority = (req, res, next) => {
+  RulePriority.deleteMany({})
+    .then(result => res.json(result))
+    .catch(err => {
+      console.log(err);
+      res.send(err);
+    });
+};
 
 const app = express();
 app.use(express.json());
 
 app.get('/', test);
 app.get('/admin/', test);
-app.get('/env', env);
 app.get('/admin/env', env);
-app.get('/db', db);
 app.get('/admin/db', db);
 app.get('/admin/addCat', addCat);
 app.get('/admin/findCats', findCats);
+app.get('/admin/resetRulePriority', resetRulePriority);
 
 app.use('/admin/instances', instanceRoutes);
 app.use('/admin/db', dbRoutes);
