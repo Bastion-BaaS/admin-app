@@ -22,7 +22,8 @@ const env = (req, res, next) => {
     DBServerIAMRole: process.env.DBServerIAMRole,
     AppServerIAMRoleArn: process.env.AppServerIAMRoleArn,
     DBServerIAMRoleArn: process.env.DBServerIAMRoleArn,
-    ALBListener: process.env.ALBListener
+    ALBListener: process.env.ALBListener,
+    AppServerLG: process.env.AppServerLG,
   };
   res.json(envVars);
 }

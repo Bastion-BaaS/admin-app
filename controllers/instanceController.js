@@ -1,10 +1,10 @@
 const aws = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
+const cloudformation = new aws.CloudFormation();
 
 const createBaaS = (req, res, next) => {
-  const cloudformation = new aws.CloudFormation();
-  const template = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-instance-no-comments.yaml'), 'utf8');
+  const template = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-development.yaml'), 'utf8');
   const params = {
     StackName: 'CreateBaaSInstance',
     TemplateBody: template,
@@ -36,6 +36,10 @@ const createBaaS = (req, res, next) => {
       {
         ParameterKey: 'SGDBServer',
         ParameterValue: process.env.SGDBServer
+      },
+      {
+        ParameterKey: 'AppServerLG',
+        ParameterValue: process.env.AppServerLG
       }
     ],
     Capabilities: ['CAPABILITY_NAMED_IAM']

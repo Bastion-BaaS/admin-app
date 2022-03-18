@@ -31,7 +31,7 @@ Resources:
         - FARGATE
       ClusterName: BaaSECSCluster
     DependsOn:
-      - CloudWatchLogsGroup
+      - AppServerLG
   AppServerECSService:
     Type: 'AWS::ECS::Service'
     Properties:
@@ -83,19 +83,19 @@ Resources:
       ContainerDefinitions:
         - Name: app-server
           Essential: 'true'
-          Image: 'public.ecr.aws/y7d9d7k6/app-server:0.5.0'
+          Image: 'public.ecr.aws/k0c9b1e9/bastion-app-server:0.0.1'
           PortMappings:
             - ContainerPort: 3001
               HostPort: 3001
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: ecs
     DependsOn:
       - BaaSECSCluster
-      - CloudWatchLogsGroup
+      - AppServerLG
       - AppServerTaskRole
   AppServerSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
@@ -184,7 +184,7 @@ Resources:
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: ecs
           MountPoints:
@@ -267,31 +267,11 @@ Resources:
         FailureThreshold: '1'
     DependsOn:
       - BaaSNameSpace
-  CloudWatchLogsGroup:
-    Type: 'AWS::Logs::LogGroup'
-    Properties:
-      LogGroupName: !Ref 'AWS::StackName'
-      RetentionInDays: 365
   InstanceEFS:
     Type: 'AWS::EFS::FileSystem'
     Properties:
       Encrypted: true
       PerformanceMode: generalPurpose
-  EFSSecurityGroupREMOVE:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 0
-          ToPort: 30000
-          CidrIp: 0.0.0.0/0
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 0
-          ToPort: 30000
-          CidrIp: 0.0.0.0/0
-      VpcId: !Ref VPCID
-      GroupDescription: Test
   MountTarget:
     Type: 'AWS::EFS::MountTarget'
     Properties:
@@ -326,4 +306,3 @@ Resources:
             TargetGroups:
               - TargetGroupArn: !Ref AppServerTargetGroup
                 Weight: 1
-    
