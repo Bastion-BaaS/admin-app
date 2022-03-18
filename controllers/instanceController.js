@@ -2,12 +2,15 @@ const aws = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
 
+const Instance = require('../models/instance');
+const cloudformation = new aws.CloudFormation();
+
 const createBaaS = (req, res, next) => {
-  const cloudformation = new aws.CloudFormation();
-  const template = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-instance-no-comments.yaml'), 'utf8');
+  const StackName = req.body.StackName;
+  const TemplateBody = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-instance-no-comments.yaml'), 'utf8');
   const params = {
-    StackName: 'CreateBaaSInstance',
-    TemplateBody: template,
+    StackName,
+    TemplateBody,
     Parameters: [
       {
         ParameterKey: 'VPCID',
@@ -46,44 +49,63 @@ const createBaaS = (req, res, next) => {
       return res.status(400).send(err);
     }
 
-    return res.status(200).json(data);
+    const newInstance = {
+      StackName,
+      StackId: data.StackId,
+    }
+
+    Instance.create(newInstance)
+      .then(createdInstance => {
+        res.status(200).json(createdInstance);
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(400).send(err);
+      })
   });
 };
 
 const destroyBaaS = (req, res, next) => {
-  const body = req.body;
-  const params = {
-    StackName: 'TODO'
-  };
-  cloudformation.deleteStack(params, (err, data) => {
-    if (err) {
-      return res.status(400).send(err);
-    }
+  Instance.findById(req.params.id)
+    .then(instance => {
+      const params = {
+        StackName: instance.StackName
+      };
 
-    return res.status(200).json(data);
-  });
+      cloudformation.deleteStack(params, (err, data) => {
+        if (err) {
+          return res.status(400).send(err);
+        }
+
+        return res.status(200).json(data);
+      });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(400).send(err);
+    })
 };
 
 const getBaaSInstances = (req, res, next) => {
-  const params = {};
-  cloudformation.listStacks(params, (err, data) => {
-    if (err) {
-      return res.status(400).send(err);
-    }
-
-    return res.status(200).json(data);
-  });
+  Instance.find({})
+    .then(instances => {
+      res.json(instances);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(400).send(err);
+    });
 };
 
 const getBaaSInstance = (req, res, next) => {
-  const id = req.params.id;
-  cloudformation.describeStacks(params, (err, data) => {
-    if (err) {
-      return res.status(400).send(err);
-    }
-
-    return res.status(200).json(data);
-  });
+  Instance.findById(req.params.id)
+    .then(instance => {
+      res.status(200).json(instance);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(400).send(err);
+    });
 }
 
 exports.createBaaS = createBaaS;
