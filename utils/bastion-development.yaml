@@ -1,15 +1,28 @@
-# This script expects a fully functioning base infrastructure deployed
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   VPCID:
     Type: String
     Default: vpc-0506ed18846c90ba5
-  SubnetID:
+  AppTierSubnet:
     Type: String
     Default: subnet-00369caabdf4fa5a6
+  DBTierSubnet:
+    Type: String
+    Default: subnet-00369caabdf4fa5a6
+  EFSSecurityGroup:
+    Type: String
+  SGAppServer:
+    Type: String
+  SGDBServer:
+    Type: String
+  ALBListener:
+    Type: String
   NewNameSpace:
     Type: String
     Default: bastion
+  ListenerRulePriority:
+    Type: Number 
+    Default: 2
 Resources:
   BaaSECSCluster:
     Type: 'AWS::ECS::Cluster'
@@ -18,7 +31,7 @@ Resources:
         - FARGATE
       ClusterName: BaaSECSCluster
     DependsOn:
-      - CloudWatchLogsGroup
+      - AppServerLG
   AppServerECSService:
     Type: 'AWS::ECS::Service'
     Properties:
@@ -37,15 +50,21 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets:
-            -  !Ref SubnetID
+            -  !Ref AppTierSubnet 
           SecurityGroups:
             - !Ref AppServerSecurityGroup
+      LoadBalancers:
+        - ContainerPort: 3001
+          ContainerName: app-server 
+          TargetGroupArn:
+            Ref: AppServerTargetGroup
     DependsOn:
       - AppServerTask
       - AppServerServiceDiscoveryEntry
       - BaaSECSCluster
       - AppServerSecurityGroup
       - DatabaseECSService
+      - AppServerTargetGroup
   AppServerTask:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
@@ -64,21 +83,20 @@ Resources:
       ContainerDefinitions:
         - Name: app-server
           Essential: 'true'
-          Image: 'public.ecr.aws/y7d9d7k6/app-server:0.4.0'
+          Image: 'public.ecr.aws/k0c9b1e9/bastion-app-server:0.0.1'
           PortMappings:
             - ContainerPort: 3001
               HostPort: 3001
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: ecs
     DependsOn:
       - BaaSECSCluster
-      - CloudWatchLogsGroup
+      - AppServerLG
       - AppServerTaskRole
-  # To be moved to infra CF
   AppServerSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -133,7 +151,7 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets:
-            - !Ref SubnetID
+            - !Ref AppTierSubnet 
           SecurityGroups:
             - !Ref DatabaseSecurityGroup
     DependsOn:
@@ -159,14 +177,14 @@ Resources:
       ContainerDefinitions:
         - Name: mongo
           Essential: true
-          Image: 'mongo:latest'
+          Image: 'public.ecr.aws/y7d9d7k6/mongo:5.0.6'
           PortMappings:
             - ContainerPort: 27017
               HostPort: 27017
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: ecs
           MountPoints:
@@ -181,7 +199,6 @@ Resources:
       - DatabaseTaskRole
       - InstanceEFS
       - MountTarget
-  # To be moved to infra CF
   DatabaseSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -197,7 +214,6 @@ Resources:
           CidrIp: 0.0.0.0/0
       VpcId: !Ref VPCID
       GroupDescription: Test
-  # To be moved to infra CF
   DatabaseTaskRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -224,8 +240,7 @@ Resources:
     Properties:
       Description: Service Discovery Namespace for BaaS Instance
       Vpc: !Ref VPCID
-      # need to change each time
-      Name: bastion
+      Name: !Ref NewNameSpace 
   AppServerServiceDiscoveryEntry:
     Type: 'AWS::ServiceDiscovery::Service'
     Properties:
@@ -252,39 +267,47 @@ Resources:
         FailureThreshold: '1'
     DependsOn:
       - BaaSNameSpace
-  CloudWatchLogsGroup:
+  AppServerLG:
     Type: 'AWS::Logs::LogGroup'
     Properties:
       LogGroupName: !Ref 'AWS::StackName'
-      RetentionInDays: 365
+      RetentionInDays: 14
   InstanceEFS:
     Type: 'AWS::EFS::FileSystem'
     Properties:
       Encrypted: true
       PerformanceMode: generalPurpose
-  # To be moved to infra CF
-  EFSSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 0
-          ToPort: 30000
-          CidrIp: 0.0.0.0/0
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 0
-          ToPort: 30000
-          CidrIp: 0.0.0.0/0
-      VpcId: !Ref VPCID
-      GroupDescription: Test
   MountTarget:
     Type: 'AWS::EFS::MountTarget'
     Properties:
       FileSystemId: !Ref InstanceEFS
       SecurityGroups:
         - !Ref EFSSecurityGroup
-      SubnetId: !Ref SubnetID
+      SubnetId: !Ref AppTierSubnet 
     DependsOn:
       - InstanceEFS
-      - EFSSecurityGroup
+  AppServerTargetGroup:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      VpcId: !Ref VPCID
+      Name: AppServerTargetGroup
+      HealthCheckEnabled: true
+      Port: 3001
+      Protocol: HTTP
+      TargetType: ip
+  AppServerALBListenerRule:
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: !Ref ListenerRulePriority
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - /server/*
+      Actions:
+        - Type: forward
+          ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn: !Ref AppServerTargetGroup
+                Weight: 1

@@ -1,3 +1,4 @@
+# Production copy. Remove SGs, Roles and Log Groups before updating
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   VPCID:
@@ -21,7 +22,7 @@ Parameters:
     Type: String
     Default: bastion
   ListenerRulePriority:
-    Type: Number 
+    Type: Number
     Default: 2
 Resources:
   BaaSECSCluster:
@@ -31,7 +32,7 @@ Resources:
         - FARGATE
       ClusterName: BaaSECSCluster
     DependsOn:
-      - CloudWatchLogsGroup
+      - AppServerLG
   AppServerECSService:
     Type: 'AWS::ECS::Service'
     Properties:
@@ -50,12 +51,12 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets:
-            -  !Ref AppTierSubnet 
+            -  !Ref AppTierSubnet
           SecurityGroups:
             - !Ref AppServerSecurityGroup
       LoadBalancers:
         - ContainerPort: 3001
-          ContainerName: app-server 
+          ContainerName: app-server
           TargetGroupArn:
             Ref: AppServerTargetGroup
     DependsOn:
@@ -90,49 +91,13 @@ Resources:
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: ecs
     DependsOn:
       - BaaSECSCluster
-      - CloudWatchLogsGroup
+      - AppServerLG
       - AppServerTaskRole
-  AppServerSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 0
-          ToPort: 30000
-          CidrIp: 0.0.0.0/0
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 0
-          ToPort: 30000
-          CidrIp: 0.0.0.0/0
-      VpcId: !Ref VPCID
-      GroupDescription: Test
-  AppServerTaskRole:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: ''
-            Effect: Allow
-            Principal:
-              Service:
-                - ecs-tasks.amazonaws.com
-            Action:
-              - 'sts:AssumeRole'
-      Policies:
-        - PolicyName: AppServerTaskRolePolicy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action: '*'
-                Resource: '*'
   DatabaseECSService:
     Type: 'AWS::ECS::Service'
     Properties:
@@ -151,7 +116,7 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets:
-            - !Ref AppTierSubnet 
+            - !Ref AppTierSubnet
           SecurityGroups:
             - !Ref DatabaseSecurityGroup
     DependsOn:
@@ -184,7 +149,7 @@ Resources:
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: ecs
           MountPoints:
@@ -199,48 +164,12 @@ Resources:
       - DatabaseTaskRole
       - InstanceEFS
       - MountTarget
-  DatabaseSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 0
-          ToPort: 30000
-          CidrIp: 0.0.0.0/0
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 0
-          ToPort: 30000
-          CidrIp: 0.0.0.0/0
-      VpcId: !Ref VPCID
-      GroupDescription: Test
-  DatabaseTaskRole:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Sid: ''
-            Effect: Allow
-            Principal:
-              Service:
-                - ecs-tasks.amazonaws.com
-            Action:
-              - 'sts:AssumeRole'
-      Policies:
-        - PolicyName: DatabaseTaskRolePolicy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action: '*'
-                Resource: '*'
   BaaSNameSpace:
     Type: 'AWS::ServiceDiscovery::PrivateDnsNamespace'
     Properties:
       Description: Service Discovery Namespace for BaaS Instance
       Vpc: !Ref VPCID
-      Name: !Ref NewNameSpace 
+      Name: !Ref NewNameSpace
   AppServerServiceDiscoveryEntry:
     Type: 'AWS::ServiceDiscovery::Service'
     Properties:
@@ -267,38 +196,23 @@ Resources:
         FailureThreshold: '1'
     DependsOn:
       - BaaSNameSpace
-  CloudWatchLogsGroup:
+  AppServerLG:
     Type: 'AWS::Logs::LogGroup'
     Properties:
       LogGroupName: !Ref 'AWS::StackName'
-      RetentionInDays: 365
+      RetentionInDays: 14
   InstanceEFS:
     Type: 'AWS::EFS::FileSystem'
     Properties:
       Encrypted: true
       PerformanceMode: generalPurpose
-  EFSSecurityGroupREMOVE:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 0
-          ToPort: 30000
-          CidrIp: 0.0.0.0/0
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 0
-          ToPort: 30000
-          CidrIp: 0.0.0.0/0
-      VpcId: !Ref VPCID
-      GroupDescription: Test
   MountTarget:
     Type: 'AWS::EFS::MountTarget'
     Properties:
       FileSystemId: !Ref InstanceEFS
       SecurityGroups:
         - !Ref EFSSecurityGroup
-      SubnetId: !Ref AppTierSubnet 
+      SubnetId: !Ref AppTierSubnet
     DependsOn:
       - InstanceEFS
   AppServerTargetGroup:
@@ -326,4 +240,3 @@ Resources:
             TargetGroups:
               - TargetGroupArn: !Ref AppServerTargetGroup
                 Weight: 1
-    
