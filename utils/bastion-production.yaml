@@ -24,6 +24,9 @@ Parameters:
   ListenerRulePriority:
     Type: Number
     Default: 2
+  AppId:
+    Type: String
+    Default: 'xxxxxxxxxxxxxxxxxxxxx'
 Resources:
   BaaSECSCluster:
     Type: 'AWS::ECS::Cluster'
@@ -94,6 +97,9 @@ Resources:
               awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: ecs
+          Environment:
+            - Name: appId
+              Value: !Ref AppId
     DependsOn:
       - BaaSECSCluster
       - AppServerLG

@@ -34,6 +34,9 @@ Parameters:
   RoutingPath:
     Type: String
     Default: /server/*
+  AppId:
+    Type: String
+    Default: 'xxxxxxxxxxxxxxxxxxxxx'
 Resources:
   BaaSECSCluster:
     Type: 'AWS::ECS::Cluster'
@@ -102,6 +105,9 @@ Resources:
               awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: ecs
+          Environment:
+            - Name: appId
+              Value: !Ref AppId
     DependsOn:
       - BaaSECSCluster
       - AppServerTaskRole
