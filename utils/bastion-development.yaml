@@ -26,15 +26,21 @@ Parameters:
   TargetGroupName:
     Type: String 
     Default: AppServerTargetGroup
+  AppServerLG:
+    Type: String
+  ClusterName:
+    Type: String
+    Default: BaaSECSCluster
+  RoutingPath:
+    Type: String
+    Default: /server/*
 Resources:
   BaaSECSCluster:
     Type: 'AWS::ECS::Cluster'
     Properties:
       CapacityProviders:
         - FARGATE
-      ClusterName: BaaSECSCluster
-    DependsOn:
-      - AppServerLG
+      ClusterName: !Ref ClusterName
   AppServerECSService:
     Type: 'AWS::ECS::Service'
     Properties:
@@ -98,7 +104,6 @@ Resources:
               awslogs-stream-prefix: ecs
     DependsOn:
       - BaaSECSCluster
-      - AppServerLG
       - AppServerTaskRole
   AppServerSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
@@ -302,7 +307,7 @@ Resources:
         - Field: path-pattern
           PathPatternConfig:
             Values:
-              - /server/*
+              - !Ref RoutingPath
       Actions:
         - Type: forward
           ForwardConfig:

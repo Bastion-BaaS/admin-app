@@ -28,10 +28,10 @@ const newRulePriority = () => {
       });
   });
 };
-
-const createBaaS = async (req, res, next) => {
-  const StackName = req.body.StackName;
-  const TargetGroupName = StackName + 'TargetGroup';
+const createParams = async (stackName) => {
+  const TargetGroupName = stackName + 'TargetGroup';
+  const ClusterName = stackName + 'Cluster';
+  const RoutingPath = `/server/${stackName}/*`;
   const TemplateBody = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-development.yaml'), 'utf8');
   let rulePriority;
 
@@ -48,8 +48,8 @@ const createBaaS = async (req, res, next) => {
     return res.status(400).send(err);
   }
 
-  const params = {
-    StackName,
+  return {
+    StackName: stackName,
     TemplateBody,
     Parameters: [
       {
@@ -91,18 +91,33 @@ const createBaaS = async (req, res, next) => {
       {
         ParameterKey: 'TargetGroupName',
         ParameterValue: TargetGroupName
+      },
+      {
+        ParameterKey: 'ClusterName',
+        ParameterValue: ClusterName
+      },
+      {
+        ParameterKey: 'NewNameSpace',
+        ParameterValue: stackName
+      },
+      {
+        ParameterKey: 'RoutingPath',
+        ParameterValue: RoutingPath
       }
     ],
     Capabilities: ['CAPABILITY_NAMED_IAM']
   };
+};
 
+const createBaaS = async (req, res, next) => {
+  const params = await createParams(req.body.name);
   cloudformation.createStack(params, (err, data) => {
     if (err) {
       return res.status(400).send(err);
     }
 
     const newInstance = {
-      StackName,
+      StackName: req.body.name,
       StackId: data.StackId,
     }
 
