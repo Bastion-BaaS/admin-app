@@ -8,7 +8,11 @@ const instanceSchema = new mongoose.Schema({
     StackId: {
         type: String,
         required: [true, 'The StackId is required']
-    }
+    },
+    AppId: {
+        type: String,
+        require: [true, 'The AppId is required']
+    },
 }, {timestamps: true});
 
 module.exports = mongoose.model('Instance', instanceSchema);

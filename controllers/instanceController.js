@@ -2,6 +2,7 @@ const aws = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
 const cloudformation = new aws.CloudFormation();
+const nanoid = require('nanoid');
 
 const Instance = require('../models/instance');
 const RulePriority = require('../models/listenerRulesPriority');
@@ -28,10 +29,10 @@ const newRulePriority = () => {
       });
   });
 };
-const createParams = async (stackName) => {
+const createParams = async (stackName, appId) => {
   const TargetGroupName = stackName + 'TargetGroup';
   const ClusterName = stackName + 'Cluster';
-  const RoutingPath = `/server/${stackName}/*`;
+  const RoutingPath = `/server/${appId}/*`;
   const TemplateBody = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-development.yaml'), 'utf8');
   let rulePriority;
 
@@ -50,6 +51,7 @@ const createParams = async (stackName) => {
 
   return {
     StackName: stackName,
+    AppId: appId,
     TemplateBody,
     Parameters: [
       {
@@ -103,6 +105,10 @@ const createParams = async (stackName) => {
       {
         ParameterKey: 'RoutingPath',
         ParameterValue: RoutingPath
+      },
+      {
+        ParameterKey: 'AppId',
+        ParameterValue: appId
       }
     ],
     Capabilities: ['CAPABILITY_NAMED_IAM']
@@ -110,7 +116,9 @@ const createParams = async (stackName) => {
 };
 
 const createBaaS = async (req, res, next) => {
-  const params = await createParams(req.body.name);
+  const appId = nanoid.nanoid();
+  const params = await createParams(req.body.name, appId);
+  console.log(`params are: ${params}`);
   cloudformation.createStack(params, (err, data) => {
     if (err) {
       return res.status(400).send(err);
@@ -119,6 +127,7 @@ const createBaaS = async (req, res, next) => {
     const newInstance = {
       StackName: req.body.name,
       StackId: data.StackId,
+      AppId: appId,
     }
 
     Instance.create(newInstance)

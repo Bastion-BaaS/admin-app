@@ -34,6 +34,9 @@ Parameters:
   RoutingPath:
     Type: String
     Default: /server/*
+  AppId:
+    Type: String
+    Default: 'xxxxxxxxxxxxxxxxxxxxx'
 Resources:
   BaaSECSCluster:
     Type: 'AWS::ECS::Cluster'
@@ -92,7 +95,7 @@ Resources:
       ContainerDefinitions:
         - Name: app-server
           Essential: 'true'
-          Image: 'public.ecr.aws/y7d9d7k6/app-server:0.5.0'
+          Image: 'public.ecr.aws/k0c9b1e9/bastion-app-server:0.0.1'
           PortMappings:
             - ContainerPort: 3001
               HostPort: 3001
@@ -102,6 +105,9 @@ Resources:
               awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: ecs
+          Environment:
+            - Name: appId
+              Value: !Ref AppId
     DependsOn:
       - BaaSECSCluster
       - AppServerTaskRole
