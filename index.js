@@ -85,7 +85,7 @@ app.get('/admin/resetRulePriority', resetRulePriority);
 app.use('/admin/instances', instanceRoutes);
 app.use('/admin/db', dbRoutes);
 app.use('/admin/data', dataRoutes);
-app.use('/admin/collection', collectionRoutes);
+app.use('/admin/collections', collectionRoutes);
 
 // error handler
 app.use((err, req, res, next) => {

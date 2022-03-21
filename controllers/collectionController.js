@@ -5,20 +5,42 @@ const { createURL } = require('../utils/helper');
 const getCollections = (req, res, next) => {
   const stackName = req.params.stackName;
 
+  const url = createURL(stackName, '/collections');
+  axios.get(url)
+    .then(response => res.json(response.data))
+    .catch(err => next(new HttpError(err, 500)));
 };
 
 const getCollection = (req, res, next) => {
   const stackName = req.params.stackName;
   const id = req.params.id;
 
+  const url = createURL(stackName, `/collections/${id}`);
+  axios.get(url)
+    .then(response => res.json(response.data))
+    .catch(err => next(new HttpError(err, 500)));
 };
+
+const createCollection = (req, res, next) => {
+  const stackName = req.params.stackName;
+
+  const url = createURL(stackName, '/collections');
+  axios.post(url, req.body)
+    .then(response => res.status(201).json(response.data))
+    .catch(err => next(new HttpError(err, 500)));
+}
 
 const deleteCollection = (req, res, next) => {
   const stackName = req.params.stackName;
   const id = req.params.id;
 
+  const url = createURL(stackName, `/collections/${id}`);
+  axios.delete(url)
+    .then(response => res.status(204).json(response.data))
+    .catch(err => next(new HttpError(err, 500)));
 };
 
 exports.getCollections = getCollections;
 exports.getCollection = getCollection;
+exports.createCollection = createCollection;
 exports.deleteCollection = deleteCollection;

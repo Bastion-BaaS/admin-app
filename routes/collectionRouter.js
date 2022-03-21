@@ -5,5 +5,6 @@ const collectionController = require('../controllers/collectionController');
 collectionRouter.delete('/:stackName/:id', collectionController.deleteCollection);
 collectionRouter.get('/:stackName/', collectionController.getCollections);
 collectionRouter.get('/:stackName/:id', collectionController.getCollection);
+collectionRouter.post('/:stackName', collectionController.createCollection);
 
 module.exports = collectionRouter;
