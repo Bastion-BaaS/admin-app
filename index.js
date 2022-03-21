@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const instanceRoutes = require('./routes/instanceRouter');
 const dbRoutes = require('./routes/dbRouter');
 const dataRoutes = require('./routes/dataRouter');
+const collectionRoutes = require('./routes/collectionRouter');
 const RulePriority = require('./models/listenerRulesPriority');
 
 const PORT = 3001;
@@ -84,6 +85,7 @@ app.get('/admin/resetRulePriority', resetRulePriority);
 app.use('/admin/instances', instanceRoutes);
 app.use('/admin/db', dbRoutes);
 app.use('/admin/data', dataRoutes);
+app.use('/admin/collection', collectionRoutes);
 
 // error handler
 app.use((err, req, res, next) => {
