@@ -1,9 +1,6 @@
 const axios = require('axios');
 const HttpError = require('../models/httpError');
-
-const createURL = (stackName, path) => {
-  return `http://app-server.${stackName}:3001/server/${stackName}${path}`;
-};
+const { createURL } = require('../utils/helper');
 
 const getAll = (req, res, next) => {
   const stackName = req.params.stackName;
