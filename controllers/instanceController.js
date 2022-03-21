@@ -1,9 +1,9 @@
 const aws = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
-const cloudformation = new aws.CloudFormation();
 const nanoid = require('nanoid');
 
+const cloudformation = new aws.CloudFormation();
 const Instance = require('../models/instance');
 const RulePriority = require('../models/listenerRulesPriority');
 const HttpError = require('../models/httpError');
@@ -153,7 +153,7 @@ const getBaaSInstance = (req, res, next) => {
   Instance.findById(req.params.id)
     .then(instance => res.status(200).json(instance))
     .catch(err => next(new HttpError(err, 500)));
-}
+};
 
 exports.createBaaS = createBaaS;
 exports.destroyBaaS = destroyBaaS;
