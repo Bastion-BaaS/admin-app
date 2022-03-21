@@ -9,7 +9,7 @@ const instanceSchema = new mongoose.Schema({
         type: String,
         required: [true, 'The StackId is required']
     },
-    AppId: {
+    ApiKey: {
         type: String,
         require: [true, 'The AppId is required']
     },

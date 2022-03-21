@@ -6,6 +6,7 @@ const nanoid = require('nanoid');
 
 const Instance = require('../models/instance');
 const RulePriority = require('../models/listenerRulesPriority');
+const HttpError = require('../models/httpError');
 
 const newRulePriority = () => {
   return new Promise((resolve, reject) => {
@@ -15,43 +16,27 @@ const newRulePriority = () => {
         const newValue = current + 1;
 
         RulePriority.findOneAndUpdate({}, { Current: newValue })
-          .then(() => {
-            resolve([false, newValue]);
-          })
-          .catch(err => {
-            console.log(err);
-            reject([err, null]);
-          })
+          .then(() => resolve(newValue))
+          .catch(err => reject(new HttpError(err, 500)))
       })
-      .catch(err => {
-        console.log(err);
-        reject([err, null]);
-      });
+      .catch(err => reject(new HttpError(err, 500)));
   });
 };
-const createParams = async (stackName, appId) => {
+
+const createParams = async (stackName, apiKey) => {
   const TargetGroupName = stackName + 'TargetGroup';
   const ClusterName = stackName + 'Cluster';
-  const RoutingPath = `/server/${appId}/*`;
+  const RoutingPath = `/server/${stackName}/*`;
   const TemplateBody = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-development.yaml'), 'utf8');
   let rulePriority;
-
   try {
-    rulePriority = await newRulePriority()
+    rulePriority = await newRulePriority();
   } catch (err) {
-    console.log(err);
-    return res.status(400).send(err);
-  }
-
-  const [ err, rulePriorityValue ] = rulePriority;
-  if (err) {
-    console.log(err);
-    return res.status(400).send(err);
+    throw err;
   }
 
   return {
     StackName: stackName,
-    AppId: appId,
     TemplateBody,
     Parameters: [
       {
@@ -88,7 +73,7 @@ const createParams = async (stackName, appId) => {
       },
       {
         ParameterKey: 'ListenerRulePriority',
-        ParameterValue: String(rulePriorityValue)
+        ParameterValue: String(rulePriority)
       },
       {
         ParameterKey: 'TargetGroupName',
@@ -99,7 +84,7 @@ const createParams = async (stackName, appId) => {
         ParameterValue: ClusterName
       },
       {
-        ParameterKey: 'NewNameSpace',
+        ParameterKey: 'StackName',
         ParameterValue: stackName
       },
       {
@@ -107,88 +92,67 @@ const createParams = async (stackName, appId) => {
         ParameterValue: RoutingPath
       },
       {
-        ParameterKey: 'AppId',
-        ParameterValue: appId
-      }
+        ParameterKey: 'ApiKey',
+        ParameterValue: apiKey
+      },
     ],
     Capabilities: ['CAPABILITY_NAMED_IAM']
   };
 };
 
 const createBaaS = async (req, res, next) => {
-  const appId = nanoid.nanoid();
-  const params = await createParams(req.body.name, appId);
-  console.log(`params are: ${params}`);
+  const apiKey = nanoid.nanoid();
+  let params;
+  try {
+    params = await createParams(req.body.name, apiKey, next);
+  } catch (err) {
+    return next(err);
+  }
+
   cloudformation.createStack(params, (err, data) => {
     if (err) {
-      return res.status(400).send(err);
+      return next(new HttpError(err, 500));
     }
 
     const newInstance = {
       StackName: req.body.name,
       StackId: data.StackId,
-      AppId: appId,
+      ApiKey: apiKey,
     }
 
     Instance.create(newInstance)
-      .then(createdInstance => {
-        res.status(200).json(createdInstance);
-      })
-      .catch(err => {
-        console.log(err);
-        res.status(400).send(err);
-      })
+      .then(createdInstance => res.status(200).json(createdInstance))
+      .catch(err => next(new HttpError(err, 500)));
   });
 };
 
 const destroyBaaS = (req, res, next) => {
   Instance.findById(req.params.id)
     .then(instance => {
-      const params = {
-        StackName: instance.StackName
-      };
-
+      const params = { StackName: instance.StackName };
       cloudformation.deleteStack(params, (err, data) => {
         if (err) {
-          return res.status(400).send(err);
+          return next(new HttpError(err, 500));
         }
         
         Instance.findByIdAndDelete(req.params.id)
-          .then(result => {
-            res.status(200).json(result);
-          })
-          .catch(err => {
-            console.log(err);
-            res.status(400).send(err);
-          });
+          .then(result => res.status(200).json(result))
+          .catch(err => next(new HttpError(err, 500)));
       });
     })
-    .catch(err => {
-      console.log(err);
-      res.status(400).send(err);
-    })
+    .catch(err => next(new HttpError(err, 500)));
 };
 
 const getBaaSInstances = (req, res, next) => {
   Instance.find({})
-    .then(instances => {
-      res.json(instances);
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(400).send(err);
-    });
+    .then(instances => res.json(instances))
+    .catch(err => next(new HttpError(err, 500)));
 };
 
 const getBaaSInstance = (req, res, next) => {
   Instance.findById(req.params.id)
-    .then(instance => {
-      res.status(200).json(instance);
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(400).send(err);
-    });
+    .then(instance => res.status(200).json(instance))
+    .catch(err => next(new HttpError(err, 500)));
 }
 
 exports.createBaaS = createBaaS;

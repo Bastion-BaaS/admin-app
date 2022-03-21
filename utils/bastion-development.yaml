@@ -17,9 +17,8 @@ Parameters:
     Type: String
   ALBListener:
     Type: String
-  NewNameSpace:
+  StackName:
     Type: String
-    Default: bastion
   ListenerRulePriority:
     Type: Number 
     Default: 2
@@ -34,7 +33,7 @@ Parameters:
   RoutingPath:
     Type: String
     Default: /server/*
-  AppId:
+  ApiKey:
     Type: String
     Default: 'xxxxxxxxxxxxxxxxxxxxx'
 Resources:
@@ -95,7 +94,7 @@ Resources:
       ContainerDefinitions:
         - Name: app-server
           Essential: 'true'
-          Image: 'public.ecr.aws/k0c9b1e9/bastion-app-server:0.0.1'
+          Image: 'public.ecr.aws/y7d9d7k6/app-server:0.6.1'
           PortMappings:
             - ContainerPort: 3001
               HostPort: 3001
@@ -104,10 +103,12 @@ Resources:
             Options:
               awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: ecs
+              awslogs-stream-prefix: !Ref StackName
           Environment:
-            - Name: appId
-              Value: !Ref AppId
+            - Name: apiKey
+              Value: !Ref ApiKey
+            - Name: stackName
+              Value: !Ref StackName
     DependsOn:
       - BaaSECSCluster
       - AppServerTaskRole
@@ -200,7 +201,7 @@ Resources:
             Options:
               awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: ecs
+              awslogs-stream-prefix: !Ref StackName
           MountPoints:
             - ContainerPath: /data/db
               SourceVolume: mongo-efs-volume
@@ -254,7 +255,7 @@ Resources:
     Properties:
       Description: Service Discovery Namespace for BaaS Instance
       Vpc: !Ref VPCID
-      Name: !Ref NewNameSpace 
+      Name: !Ref StackName 
   AppServerServiceDiscoveryEntry:
     Type: 'AWS::ServiceDiscovery::Service'
     Properties:
