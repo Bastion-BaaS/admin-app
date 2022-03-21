@@ -17,21 +17,32 @@ Parameters:
     Type: String
   ALBListener:
     Type: String
-  NewNameSpace:
+  StackName:
     Type: String
-    Default: bastion
   ListenerRulePriority:
     Type: Number 
     Default: 2
+  TargetGroupName:
+    Type: String 
+    Default: AppServerTargetGroup
+  AppServerLG:
+    Type: String
+  ClusterName:
+    Type: String
+    Default: BaaSECSCluster
+  RoutingPath:
+    Type: String
+    Default: /server/*
+  ApiKey:
+    Type: String
+    Default: 'xxxxxxxxxxxxxxxxxxxxx'
 Resources:
   BaaSECSCluster:
     Type: 'AWS::ECS::Cluster'
     Properties:
       CapacityProviders:
         - FARGATE
-      ClusterName: BaaSECSCluster
-    DependsOn:
-      - AppServerLG
+      ClusterName: !Ref ClusterName
   AppServerECSService:
     Type: 'AWS::ECS::Service'
     Properties:
@@ -83,7 +94,7 @@ Resources:
       ContainerDefinitions:
         - Name: app-server
           Essential: 'true'
-          Image: 'public.ecr.aws/k0c9b1e9/bastion-app-server:0.0.1'
+          Image: 'public.ecr.aws/y7d9d7k6/app-server:0.6.1'
           PortMappings:
             - ContainerPort: 3001
               HostPort: 3001
@@ -92,10 +103,14 @@ Resources:
             Options:
               awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: ecs
+              awslogs-stream-prefix: !Ref StackName
+          Environment:
+            - Name: apiKey
+              Value: !Ref ApiKey
+            - Name: stackName
+              Value: !Ref StackName
     DependsOn:
       - BaaSECSCluster
-      - AppServerLG
       - AppServerTaskRole
   AppServerSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
@@ -186,7 +201,7 @@ Resources:
             Options:
               awslogs-group: !Ref AppServerLG
               awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: ecs
+              awslogs-stream-prefix: !Ref StackName
           MountPoints:
             - ContainerPath: /data/db
               SourceVolume: mongo-efs-volume
@@ -240,7 +255,7 @@ Resources:
     Properties:
       Description: Service Discovery Namespace for BaaS Instance
       Vpc: !Ref VPCID
-      Name: !Ref NewNameSpace 
+      Name: !Ref StackName 
   AppServerServiceDiscoveryEntry:
     Type: 'AWS::ServiceDiscovery::Service'
     Properties:
@@ -285,7 +300,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
     Properties:
       VpcId: !Ref VPCID
-      Name: AppServerTargetGroup
+      Name: !Ref TargetGroupName
       HealthCheckEnabled: true
       Port: 3001
       Protocol: HTTP
@@ -299,7 +314,7 @@ Resources:
         - Field: path-pattern
           PathPatternConfig:
             Values:
-              - /server/*
+              - !Ref RoutingPath
       Actions:
         - Type: forward
           ForwardConfig:
