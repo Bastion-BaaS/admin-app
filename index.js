@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const instanceRoutes = require('./routes/instanceRouter');
-const dbRoutes = require('./routes/dbRouter');
 const dataRoutes = require('./routes/dataRouter');
 const collectionRoutes = require('./routes/collectionRouter');
 const RulePriority = require('./models/listenerRulesPriority');
@@ -83,7 +82,6 @@ app.get('/admin/db', db);
 app.get('/admin/resetRulePriority', resetRulePriority);
 
 app.use('/admin/instances', instanceRoutes);
-app.use('/admin/db', dbRoutes);
 app.use('/admin/data', dataRoutes);
 app.use('/admin/collections', collectionRoutes);
 
