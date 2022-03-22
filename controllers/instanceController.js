@@ -1,16 +1,19 @@
 const aws = require('aws-sdk');
 const nanoid = require('nanoid');
+const fs = require('fs');
+const path = require('path');
 
 const cloudformation = new aws.CloudFormation();
 const Instance = require('../models/instance');
 const HttpError = require('../models/httpError');
 const { createParams } = require('../utils/helper');
+const TemplateBody = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-development.yaml'), 'utf8');
 
 const createBaaS = async (req, res, next) => {
   const apiKey = nanoid.nanoid();
   let params;
   try {
-    params = await createParams(req.body.name, apiKey);
+    params = await createParams(req.body.name, apiKey, TemplateBody);
   } catch (err) {
     return next(err);
   }
@@ -27,13 +30,14 @@ const createBaaS = async (req, res, next) => {
     }
 
     Instance.create(newInstance)
-      .then(createdInstance => res.status(200).json(createdInstance))
+      .then(createdInstance => res.status(201).json(createdInstance))
       .catch(err => next(new HttpError(err, 500)));
   });
 };
 
 const destroyBaaS = (req, res, next) => {
-  Instance.findById(req.params.id)
+  const stackName = req.params.stackName;
+  Instance.findOne({ StackName: stackName })
     .then(instance => {
       const params = { StackName: instance.StackName };
       cloudformation.deleteStack(params, (err, data) => {
@@ -41,8 +45,8 @@ const destroyBaaS = (req, res, next) => {
           return next(new HttpError(err, 500));
         }
         
-        Instance.findByIdAndDelete(req.params.id)
-          .then(result => res.status(200).json(result))
+        Instance.findOneAndDelete({ StackName: stackName })
+          .then(result => res.status(204).json(result))
           .catch(err => next(new HttpError(err, 500)));
       });
     })
@@ -56,7 +60,8 @@ const getBaaSInstances = (req, res, next) => {
 };
 
 const getBaaSInstance = (req, res, next) => {
-  Instance.findById(req.params.id)
+  const stackName = req.params.stackName;
+  Instance.findOne({ StackName: stackName })
     .then(instance => res.status(200).json(instance))
     .catch(err => next(new HttpError(err, 500)));
 };

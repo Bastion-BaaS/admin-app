@@ -4,7 +4,9 @@ const mongoose = require('mongoose');
 const instanceRoutes = require('./routes/instanceRouter');
 const dataRoutes = require('./routes/dataRouter');
 const collectionRoutes = require('./routes/collectionRouter');
+const cloudCodeRoutes = require('./routes/cloudCodeRouter');
 const RulePriority = require('./models/listenerRulesPriority');
+const HttpError = require('./models/httpError');
 
 const PORT = 3001;
 
@@ -46,30 +48,12 @@ const db = (req, res, next) => {
                 console.log('connected to mongo');
                 res.json({ status: 'connected' });
               })
-              .catch(err => {
-                console.log(err);
-                res.send(err);
-              });
+              .catch(err => next(new HttpError(err, 500)));
           }
         })
-        .catch(err => {
-          console.log(err);
-          res.send(err);
-        })
+        .catch(err => next(new HttpError(err, 500)));
     })
-    .catch(error => {
-      console.log(error);
-      res.send(error);
-    });
-}
-
-const resetRulePriority = (req, res, next) => {
-  RulePriority.deleteMany({})
-    .then(result => res.json(result))
-    .catch(err => {
-      console.log(err);
-      res.send(err);
-    });
+    .catch(err => next(new HttpError(err, 500)));
 };
 
 const app = express();
@@ -79,11 +63,11 @@ app.get('/', test);
 app.get('/admin/', test);
 app.get('/admin/env', env);
 app.get('/admin/db', db);
-app.get('/admin/resetRulePriority', resetRulePriority);
 
 app.use('/admin/instances', instanceRoutes);
 app.use('/admin/data', dataRoutes);
 app.use('/admin/collections', collectionRoutes);
+app.use('/admin/ccf', cloudCodeRoutes);
 
 // error handler
 app.use((err, req, res, next) => {

@@ -27,7 +27,7 @@ const createOne = (req, res, next) => {
   const stackName = req.params.stackName;
   const collectionName = req.params.collectionName;
 
-  const url = createURL(stackName, `/data/${collectionName}/${id}`);
+  const url = createURL(stackName, `/data/${collectionName}`);
   axios.post(url, req.body)
     .then(response => res.status(201).json(response.data))
     .catch(err => next(new HttpError(err, 500)));

@@ -1,4 +1,3 @@
-const fs = require('fs');
 const RulePriority = require('../models/listenerRulesPriority');
 const HttpError = require('../models/httpError');
 
@@ -21,11 +20,10 @@ const newRulePriority = () => {
   });
 };
 
-const createParams = async (stackName, apiKey) => {
+const createParams = async (stackName, apiKey, TemplateBody) => {
   const TargetGroupName = stackName + 'TargetGroup';
   const ClusterName = stackName + 'Cluster';
   const RoutingPath = `/server/${stackName}/*`;
-  const TemplateBody = fs.readFileSync('./bastion-development.yaml', 'utf8');
   let rulePriority;
   try {
     rulePriority = await newRulePriority();
