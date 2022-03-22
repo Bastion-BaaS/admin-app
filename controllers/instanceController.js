@@ -9,34 +9,31 @@ const HttpError = require('../models/httpError');
 const { createParams, isValidStackName } = require('../utils/helper');
 const TemplateBody = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-development.yaml'), 'utf8');
 
-const createBaaS = async (req, res, next) => {
+const createBaaS = (req, res, next) => {
   const apiKey = nanoid.nanoid();
   if (!isValidStackName(req.body.name)) {
     return next(new HttpError(new Error("Invalid stack name. Only use letters, numbers, '_', and '-'.")), 500);
   }
 
-  let params;
-  try {
-    params = await createParams(req.body.name, apiKey, TemplateBody);
-  } catch (err) {
-    return next(err);
-  }
+  createParams(req.body.name, apiKey, TemplateBody)
+    .then(params => {
+      cloudformation.createStack(params, (err, data) => {
+        if (err) {
+          return next(new HttpError(err, 500));
+        }
 
-  cloudformation.createStack(params, (err, data) => {
-    if (err) {
-      return next(new HttpError(err, 500));
-    }
+        const newInstance = {
+          StackName: req.body.name,
+          StackId: data.StackId,
+          ApiKey: apiKey,
+        }
 
-    const newInstance = {
-      StackName: req.body.name,
-      StackId: data.StackId,
-      ApiKey: apiKey,
-    }
-
-    Instance.create(newInstance)
-      .then(createdInstance => res.status(201).json(createdInstance))
-      .catch(err => next(new HttpError(err, 500)));
-  });
+        Instance.create(newInstance)
+          .then(createdInstance => res.status(201).json(createdInstance))
+          .catch(err => next(new HttpError(err, 500)));
+      });
+    })
+    .catch(err => next(err));
 };
 
 const destroyBaaS = (req, res, next) => {

@@ -27,7 +27,7 @@ const addApiKey = (req, res, next) => {
     .catch(err => next(new HttpError(err, 500)));
 };
 
-const errorMiddleware = (err, req, res) => {
+const errorMiddleware = (err, req, res, next) => {
   console.log(err);
   res.status(err.code || 500).json({ error: err.message || "An unknown error occured" });
 }

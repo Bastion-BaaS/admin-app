@@ -23,80 +23,78 @@ const newRulePriority = () => {
   });
 };
 
-const createParams = async (stackName, apiKey, TemplateBody) => {
-  const TargetGroupName = stackName + 'TargetGroup';
-  const ClusterName = stackName + 'Cluster';
-  const RoutingPath = `/server/${stackName}/*`;
-  let rulePriority;
-  try {
-    rulePriority = await newRulePriority();
-  } catch (err) {
-    throw err;
-  }
+const createParams = (stackName, apiKey, TemplateBody) => {
+  return new Promise((resolve, reject) => {
+    const TargetGroupName = stackName + 'TargetGroup';
+    const ClusterName = stackName + 'Cluster';
+    const RoutingPath = `/server/${stackName}/*`;
 
-  return {
-    StackName: stackName,
-    TemplateBody,
-    Parameters: [
-      {
-        ParameterKey: 'VPCID',
-        ParameterValue: process.env.VpcId
-      },
-      {
-        ParameterKey: 'AppTierSubnet',
-        ParameterValue: process.env.AppTierSubnet
-      },
-      {
-        ParameterKey: 'DBTierSubnet',
-        ParameterValue: process.env.DBTierSubnet
-      },
-      {
-        ParameterKey: 'EFSSecurityGroup',
-        ParameterValue: process.env.EFSSecurityGroup
-      },
-      {
-        ParameterKey: 'SGAppServer',
-        ParameterValue: process.env.SGAppServer
-      },
-      {
-        ParameterKey: 'ALBListener',
-        ParameterValue: process.env.ALBListener
-      },
-      {
-        ParameterKey: 'SGDBServer',
-        ParameterValue: process.env.SGDBServer
-      },
-      {
-        ParameterKey: 'AppServerLG',
-        ParameterValue: process.env.AppServerLG
-      },
-      {
-        ParameterKey: 'ListenerRulePriority',
-        ParameterValue: String(rulePriority)
-      },
-      {
-        ParameterKey: 'TargetGroupName',
-        ParameterValue: TargetGroupName
-      },
-      {
-        ParameterKey: 'ClusterName',
-        ParameterValue: ClusterName
-      },
-      {
-        ParameterKey: 'StackName',
-        ParameterValue: stackName
-      },
-      {
-        ParameterKey: 'RoutingPath',
-        ParameterValue: RoutingPath
-      },
-      {
-        ParameterKey: 'ApiKey',
-        ParameterValue: apiKey
-      },
-    ],
-    Capabilities: ['CAPABILITY_NAMED_IAM']
-  };
+    newRulePriority()
+      .then(rulePriority => resolve({
+        StackName: stackName,
+        TemplateBody,
+        Parameters: [
+          {
+            ParameterKey: 'VPCID',
+            ParameterValue: process.env.VpcId
+          },
+          {
+            ParameterKey: 'AppTierSubnet',
+            ParameterValue: process.env.AppTierSubnet
+          },
+          {
+            ParameterKey: 'DBTierSubnet',
+            ParameterValue: process.env.DBTierSubnet
+          },
+          {
+            ParameterKey: 'EFSSecurityGroup',
+            ParameterValue: process.env.EFSSecurityGroup
+          },
+          {
+            ParameterKey: 'SGAppServer',
+            ParameterValue: process.env.SGAppServer
+          },
+          {
+            ParameterKey: 'ALBListener',
+            ParameterValue: process.env.ALBListener
+          },
+          {
+            ParameterKey: 'SGDBServer',
+            ParameterValue: process.env.SGDBServer
+          },
+          {
+            ParameterKey: 'AppServerLG',
+            ParameterValue: process.env.AppServerLG
+          },
+          {
+            ParameterKey: 'ListenerRulePriority',
+            ParameterValue: String(rulePriority)
+          },
+          {
+            ParameterKey: 'TargetGroupName',
+            ParameterValue: TargetGroupName
+          },
+          {
+            ParameterKey: 'ClusterName',
+            ParameterValue: ClusterName
+          },
+          {
+            ParameterKey: 'StackName',
+            ParameterValue: stackName
+          },
+          {
+            ParameterKey: 'RoutingPath',
+            ParameterValue: RoutingPath
+          },
+          {
+            ParameterKey: 'ApiKey',
+            ParameterValue: apiKey
+          },
+        ],
+        Capabilities: ['CAPABILITY_NAMED_IAM']
+      }))
+      .catch(err => reject(err));
+  });
 };
 
 const isValidStackName = (stackName) => {
