@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "local": "NODE_ENV=local nodemon index.js"
   },
   "author": "",
   "license": "ISC",
@@ -17,5 +18,8 @@
     "mongoose": "^6.2.7",
     "nanoid": "^3.3.1",
     "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }

@@ -2,6 +2,9 @@ const RulePriority = require('../models/listenerRulesPriority');
 const HttpError = require('../models/httpError');
 
 const createURL = (stackName, path) => {
+  if (process.env.NODE_ENV === 'local') {
+    return `http://localhost:3001/server/${stackName}${path}`;
+  }
   return `http://app-server.${stackName}:3001/server/${stackName}${path}`;
 };
 

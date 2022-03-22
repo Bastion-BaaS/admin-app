@@ -3,6 +3,17 @@ const Instance = require('../models/instance');
 
 const addApiKey = (req, res, next) => {
   const stackName = req.params.stackName;
+  if (process.env.NODE_ENV === 'local') {
+    req.axiosConfig = {
+      headers: {
+        'Authorization': 'Basic development',
+        'X-REQUESTED-BY': 'admin-app',
+        'Content-Type': 'application/json'
+      }
+    };
+    return next();
+  }
+
   Instance.findOne({ StackName: stackName })
     .then(instance => {
       req.axiosConfig = {

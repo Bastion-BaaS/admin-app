@@ -6,10 +6,11 @@ const dataRoutes = require('./routes/dataRouter');
 const collectionRoutes = require('./routes/collectionRouter');
 const cloudCodeRoutes = require('./routes/cloudCodeRouter');
 const userRoutes = require('./routes/userRouter');
+const fileRoutes = require('./routes/fileRouter');
+
 const RulePriority = require('./models/listenerRulesPriority');
 const HttpError = require('./models/httpError');
-
-const PORT = 3001;
+const PORT = process.env.NODE_ENV === 'local' ? 3002 : 3001;
 
 const test = (req, res, next) => {
   res.json({ test: 'hi' });
@@ -34,7 +35,12 @@ const env = (req, res, next) => {
 }
 
 const db = (req, res, next) => {
-  mongoose.connect('mongodb://localhost:27017')
+  let url = 'mongodb://localhost:27017';
+  if (process.env.NODE_ENV === 'local') {
+    url = 'mongodb://localhost:27016';
+  }
+
+  mongoose.connect(url)
     .then(() => {
       RulePriority.find({})
         .then(rulePriority => {
@@ -70,6 +76,7 @@ app.use('/admin/data', dataRoutes);
 app.use('/admin/collections', collectionRoutes);
 app.use('/admin/ccf', cloudCodeRoutes);
 app.use('/admin/users', userRoutes);
+app.use('/admin/files', fileRoutes);
 
 // error handler
 app.use((err, req, res, next) => {
