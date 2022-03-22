@@ -7,7 +7,8 @@ const addApiKey = (req, res, next) => {
     .then(instance => {
       req.axiosConfig = {
         headers: {
-          'Authorization': `Basic ${instance.ApiKey}`
+          'Authorization': `Basic ${instance.ApiKey}`,
+          'X-REQUESTED-BY': 'admin-app'
         }
       };
       next();
