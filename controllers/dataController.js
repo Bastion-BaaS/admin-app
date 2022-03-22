@@ -61,7 +61,7 @@ const deleteOne = (req, res, next) => {
   const id = req.params.id;
 
   const url = createURL(stackName, `/data/${collectionName}/${id}`);
-  axios.get(url)
+  axios.delete(url)
     .then(response => res.status(204).json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
