@@ -1,11 +1,12 @@
 const express = require ('express');
 const userRouter = express.Router();
 const userController = require('../controllers/userController');
+const { addApiKey } = require('../utils/middleware');
 
-userRouter.post('/:stackName/users', userController.createUser);
-userRouter.delete('/:stackName/users/:id', userController.deleteUser);
-userRouter.get('/:stackName/users', userController.getUsers);
-userRouter.get('/:stackName/users/:id', userController.getUser);
-userRouter.put('/:stackName/users/:id', userController.putUser);
+userRouter.post('/:stackName/users', addApiKey, userController.createUser);
+userRouter.delete('/:stackName/users/:id', addApiKey, userController.deleteUser);
+userRouter.get('/:stackName/users', addApiKey, userController.getUsers);
+userRouter.get('/:stackName/users/:id', addApiKey, userController.getUser);
+userRouter.put('/:stackName/users/:id', addApiKey, userController.putUser);
 
 module.exports = userRouter;

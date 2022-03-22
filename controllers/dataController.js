@@ -2,15 +2,12 @@ const axios = require('axios');
 const HttpError = require('../models/httpError');
 const { createURL } = require('../utils/helper');
 
-// TODO
-// make header with api key for all the axios requests
-
 const getAll = (req, res, next) => {
   const stackName = req.params.stackName;
   const collectionName = req.params.collectionName;
 
   const url = createURL(stackName, `/data/${collectionName}`);
-  axios.get(url)
+  axios.get(url, req.axiosConfig)
     .then(response => res.json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
@@ -21,7 +18,7 @@ const getOne = (req, res, next) => {
   const id = req.params.id;
 
   const url = createURL(stackName, `/data/${collectionName}/${id}`);
-  axios.get(url)
+  axios.get(url, req.axiosConfig)
     .then(response => res.json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
@@ -31,7 +28,7 @@ const createOne = (req, res, next) => {
   const collectionName = req.params.collectionName;
 
   const url = createURL(stackName, `/data/${collectionName}`);
-  axios.post(url, req.body)
+  axios.post(url, req.body, req.axiosConfig)
     .then(response => res.status(201).json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
@@ -42,7 +39,7 @@ const putOne = (req, res, next) => {
   const id = req.params.id;
 
   const url = createURL(stackName, `/data/${collectionName}/${id}`);
-  axios.put(url, req.body)
+  axios.put(url, req.body, req.axiosConfig)
     .then(response => res.status(201).json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
@@ -53,7 +50,7 @@ const patchOne = (req, res, next) => {
   const id = req.params.id;
 
   const url = createURL(stackName, `/data/${collectionName}/${id}`);
-  axios.patch(url, req.body)
+  axios.patch(url, req.body, req.axiosConfig)
     .then(response => res.status(201).json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
@@ -64,7 +61,7 @@ const deleteOne = (req, res, next) => {
   const id = req.params.id;
 
   const url = createURL(stackName, `/data/${collectionName}/${id}`);
-  axios.delete(url)
+  axios.delete(url, req.axiosConfig)
     .then(response => res.status(204).json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
