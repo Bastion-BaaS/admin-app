@@ -2,6 +2,9 @@ const axios = require('axios');
 const HttpError = require('../models/httpError');
 const { createURL } = require('../utils/helper');
 
+// TODO
+// make header with api key for all the axios requests
+
 const getAll = (req, res, next) => {
   const stackName = req.params.stackName;
   const collectionName = req.params.collectionName;

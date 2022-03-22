@@ -5,6 +5,7 @@ const instanceRoutes = require('./routes/instanceRouter');
 const dataRoutes = require('./routes/dataRouter');
 const collectionRoutes = require('./routes/collectionRouter');
 const cloudCodeRoutes = require('./routes/cloudCodeRouter');
+const userRoutes = require('./routes/userRouter');
 const RulePriority = require('./models/listenerRulesPriority');
 const HttpError = require('./models/httpError');
 
@@ -68,6 +69,7 @@ app.use('/admin/instances', instanceRoutes);
 app.use('/admin/data', dataRoutes);
 app.use('/admin/collections', collectionRoutes);
 app.use('/admin/ccf', cloudCodeRoutes);
+app.use('/admin/users', userRoutes);
 
 // error handler
 app.use((err, req, res, next) => {
