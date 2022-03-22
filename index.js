@@ -10,6 +10,7 @@ const fileRoutes = require('./routes/fileRouter');
 
 const RulePriority = require('./models/listenerRulesPriority');
 const HttpError = require('./models/httpError');
+const { errorMiddleware } = require('./utils/middleware');
 const PORT = process.env.NODE_ENV === 'local' ? 3002 : 3001;
 
 const test = (req, res, next) => {
@@ -78,10 +79,6 @@ app.use('/admin/ccf', cloudCodeRoutes);
 app.use('/admin/users', userRoutes);
 app.use('/admin/files', fileRoutes);
 
-// error handler
-app.use((err, req, res, next) => {
-  console.log(err);
-  res.status(err.code || 500).json({ error: err.message || "An unknown error occured" });
-});
+app.use(errorMiddleware);
 
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
