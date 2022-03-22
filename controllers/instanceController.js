@@ -6,11 +6,15 @@ const path = require('path');
 const cloudformation = new aws.CloudFormation();
 const Instance = require('../models/instance');
 const HttpError = require('../models/httpError');
-const { createParams } = require('../utils/helper');
+const { createParams, isValidStackName } = require('../utils/helper');
 const TemplateBody = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-development.yaml'), 'utf8');
 
 const createBaaS = async (req, res, next) => {
   const apiKey = nanoid.nanoid();
+  if (!isValidStackName(req.body.name)) {
+    return next(new HttpError(new Error("Invalid stack name. Only use letters, numbers, '_', and '-'.")), 500);
+  }
+
   let params;
   try {
     params = await createParams(req.body.name, apiKey, TemplateBody);

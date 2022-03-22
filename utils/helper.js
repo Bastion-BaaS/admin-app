@@ -96,5 +96,10 @@ const createParams = async (stackName, apiKey, TemplateBody) => {
   };
 };
 
+const isValidStackName = (stackName) => {
+  return /^[A-Za-z0-9-_]*$/.test(stackName);
+};
+
 exports.createURL = createURL;
 exports.createParams = createParams;
+exports.isValidStackName = isValidStackName;
