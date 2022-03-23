@@ -190,7 +190,7 @@ Resources:
       Cpu: '256'
       Memory: '512'
       ContainerDefinitions:
-        - Name: mongo
+        - Name: db-server
           Essential: true
           Image: 'public.ecr.aws/y7d9d7k6/mongo:5.0.6'
           PortMappings:
