@@ -23,7 +23,7 @@ const newRulePriority = () => {
   });
 };
 
-const createParams = (stackName, apiKey, TemplateBody) => {
+const createParams = (stackName, apiKey, TemplateBody, stackBucketName) => {
   return new Promise((resolve, reject) => {
     const TargetGroupName = stackName + 'TargetGroup';
     const ClusterName = stackName + 'Cluster';
@@ -81,6 +81,10 @@ const createParams = (stackName, apiKey, TemplateBody) => {
           {
             ParameterKey: 'StackName',
             ParameterValue: stackName
+          },
+          {
+            ParameterKey: 'StackBucketName',
+            ParameterValue: stackBucketName
           },
           {
             ParameterKey: 'RoutingPath',
