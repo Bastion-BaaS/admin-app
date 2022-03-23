@@ -1,0 +1,32 @@
+# For development configuration on local
+version: '3.4'
+services:
+  admin-app:
+    build:
+      context: .
+      target: development
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - NODE_ENV=development
+      - VpcId=development
+      - DBTierSubnet=development
+      - AppTierSubnet=development
+      - EFSSecurityGroup=development
+      - SGDBServer=development
+      - AppServerIAMRole=development
+      - DBServerIAMRole=development
+      - AppServerIAMRoleArn=development
+      - DBServerIAMRoleArn=development
+      - ALBListener=development
+      - AppServerLG=development
+    depends_on:
+      - admin-db
+  admin-db:
+    image: mongo:5.0.6
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_ROOT_USERNAME=admin-app

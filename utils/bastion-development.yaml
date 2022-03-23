@@ -19,6 +19,8 @@ Parameters:
     Type: String
   StackName:
     Type: String
+  StackBucketName:
+    Type: String
   ListenerRulePriority:
     Type: Number 
     Default: 2
@@ -190,7 +192,7 @@ Resources:
       Cpu: '256'
       Memory: '512'
       ContainerDefinitions:
-        - Name: mongo
+        - Name: db-server
           Essential: true
           Image: 'public.ecr.aws/y7d9d7k6/mongo:5.0.6'
           PortMappings:
@@ -321,3 +323,16 @@ Resources:
             TargetGroups:
               - TargetGroupArn: !Ref AppServerTargetGroup
                 Weight: 1
+  StackBucket:
+    Type: 'AWS::S3::Bucket'
+    Description: S3 Bucket for Cloud Code Function zip files and file storage
+    Properties:
+      BucketName: !Ref StackBucketName
+      VersioningConfiguration:
+        Status: Suspended
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
