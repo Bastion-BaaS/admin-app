@@ -32,13 +32,13 @@ const createCloudCodeFunction = async (req, res, next) => {
 
   let s3Result = await ccf.uploadZipToS3(ccfBucketName, ccfName);
   if (s3Result.error) {
-    next(new HttpError(roleResult.error, 500));
+    next(new HttpError(s3Result.error, 500));
   }
 
 
   let lambdaResult = ccf.createLambda(ccfName, ccfBucketName);
   if (lambdaResult?.error) {
-    next(new HttpError(lambdaResult, 500));
+    next(new HttpError(lambdaResult.error, 500));
   }
 
   const request = { name: ccfName };
