@@ -13,8 +13,10 @@ const db = require('./db');
 
 app.use(express.json());
 
-db.configureMongo(...config.MONGO_CREDENTIALS);
-db.setRulePriority();
+setTimeout(() => {
+  db.configureMongo(...config.MONGO_CREDENTIALS);
+  db.setRulePriority();
+}, 10000);
 
 app.use('/admin/instances', instanceRoutes);
 app.use('/admin/data', dataRoutes);
