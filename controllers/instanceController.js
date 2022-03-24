@@ -16,7 +16,7 @@ const createBaaS = (req, res, next) => {
     return next(new HttpError(new Error("Invalid stack name. Only use letters, numbers, '_', and '-'.")), 500);
   }
   const apiKey = nanoid.nanoid();
-  const bucketName = `${stackName}-bucket-${crypto.randomBytes(10).toString('hex')}`;
+  const bucketName = `${stackName}-bucket-${crypto.randomBytes(10).toString('hex')}`.toLowerCase();
 
   createParams(stackName, apiKey, TemplateBody, bucketName)
     .then(params => {
@@ -29,7 +29,7 @@ const createBaaS = (req, res, next) => {
           StackName: stackName,
           StackId: data.StackId,
           ApiKey: apiKey,
-          BucketName: stackBucketName,
+          BucketName: bucketName,
         }
 
         Instance.create(newInstance)

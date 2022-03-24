@@ -38,6 +38,8 @@ Parameters:
   ApiKey:
     Type: String
     Default: 'xxxxxxxxxxxxxxxxxxxxx'
+  DBHost:
+    Type: String
 Resources:
   BaaSECSCluster:
     Type: 'AWS::ECS::Cluster'
@@ -96,7 +98,7 @@ Resources:
       ContainerDefinitions:
         - Name: app-server
           Essential: 'true'
-          Image: 'public.ecr.aws/y7d9d7k6/app-server:0.7.0'
+          Image: 'public.ecr.aws/y7d9d7k6/app-server:0.7.2'
           PortMappings:
             - ContainerPort: 3001
               HostPort: 3001
@@ -111,6 +113,8 @@ Resources:
               Value: !Ref ApiKey
             - Name: stackName
               Value: !Ref StackName
+            - Name: DB_HOST
+              Value: !Ref DBHost
     DependsOn:
       - BaaSECSCluster
       - AppServerTaskRole
@@ -207,6 +211,11 @@ Resources:
           MountPoints:
             - ContainerPath: /data/db
               SourceVolume: mongo-efs-volume
+          Environment:
+            - Name: MONGO_INITDB_ROOT_PASSWORD
+              Value: db_password
+            - Name: MONGO_INITDB_ROOT_USERNAME
+              Value: bastion
       Volumes:
         - Name: mongo-efs-volume
           EFSVolumeConfiguration:
@@ -267,8 +276,6 @@ Resources:
           - Type: A
             TTL: '10'
         NamespaceId: !Ref BaaSNameSpace
-      HealthCheckCustomConfig:
-        FailureThreshold: '1'
     DependsOn:
       - BaaSNameSpace
   DatabaseServiceDiscoveryEntry:
@@ -280,8 +287,6 @@ Resources:
           - Type: A
             TTL: '10'
         NamespaceId: !Ref BaaSNameSpace
-      HealthCheckCustomConfig:
-        FailureThreshold: '1'
     DependsOn:
       - BaaSNameSpace
   InstanceEFS:
@@ -304,6 +309,7 @@ Resources:
       VpcId: !Ref VPCID
       Name: !Ref TargetGroupName
       HealthCheckEnabled: true
+      HealthCheckPath: /server
       Port: 3001
       Protocol: HTTP
       TargetType: ip
