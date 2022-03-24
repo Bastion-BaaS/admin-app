@@ -18,6 +18,8 @@ setTimeout(() => {
   db.setRulePriority();
 }, 10000);
 
+router.get('/', (req, res, next) => res.json({ healthcheck: "okay" }));
+
 app.use('/admin/instances', instanceRoutes);
 app.use('/admin/data', dataRoutes);
 app.use('/admin/collections', collectionRoutes);
