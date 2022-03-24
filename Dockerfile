@@ -9,13 +9,13 @@ COPY . .
 # Shared env vars between development and prod
 ENV DB_USER=admin-app \
   DB_PASSWORD=password \
-  DB_HOST=admin-db \
   DB_PORT=27017 \
   DB_NAME=admin-db
 
 FROM base as development
 
-ENV NODE_ENV=development
+ENV NODE_ENV=development \
+  DB_HOST=admin-db
 
 RUN npm install
 
@@ -23,7 +23,8 @@ CMD ["node", "index.js"]
 
 FROM base as production
 
-ENV NODE_ENV=production
+ENV NODE_ENV=production \
+  DB_HOST=localhost
 
 ENV PORT=3001
 
