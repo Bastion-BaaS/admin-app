@@ -309,7 +309,6 @@ Resources:
       VpcId: !Ref VPCID
       Name: !Ref TargetGroupName
       HealthCheckEnabled: true
-      HealthCheckPath: /server
       Port: 3001
       Protocol: HTTP
       TargetType: ip
