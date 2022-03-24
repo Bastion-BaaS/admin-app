@@ -2,6 +2,7 @@ const aws = require('aws-sdk');
 const nanoid = require('nanoid');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const cloudformation = new aws.CloudFormation();
 const Instance = require('../models/instance');
@@ -10,12 +11,14 @@ const { createParams, isValidStackName } = require('../utils/helper');
 const TemplateBody = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-development.yaml'), 'utf8');
 
 const createBaaS = (req, res, next) => {
-  const apiKey = nanoid.nanoid();
-  if (!isValidStackName(req.body.name)) {
+  const stackName = req.body?.name;
+  if (!isValidStackName(stackName)) {
     return next(new HttpError(new Error("Invalid stack name. Only use letters, numbers, '_', and '-'.")), 500);
   }
+  const apiKey = nanoid.nanoid();
+  const bucketName = `${stackName}-bucket-${crypto.randomBytes(10).toString('hex')}`;
 
-  createParams(req.body.name, apiKey, TemplateBody)
+  createParams(stackName, apiKey, TemplateBody, bucketName)
     .then(params => {
       cloudformation.createStack(params, (err, data) => {
         if (err) {
@@ -23,9 +26,10 @@ const createBaaS = (req, res, next) => {
         }
 
         const newInstance = {
-          StackName: req.body.name,
+          StackName: stackName,
           StackId: data.StackId,
           ApiKey: apiKey,
+          BucketName: stackBucketName,
         }
 
         Instance.create(newInstance)

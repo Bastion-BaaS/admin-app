@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 const RulePriority = require('../models/listenerRulesPriority');
 
 const configureMongo = (env, user, password, host, port, dbName) => {
-  mongoose.connection.on('error', err => {
-    console.error(`Mongoose Error: ${err}`);
-  });
-
   if (env === 'production') {
     mongoose.set('debug', { color: false, shell: true });
   } else {

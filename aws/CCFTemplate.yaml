@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  CCFName:
+    Type: String
+  CCFRoleArn:
+    Type: String
+  CCFBucketName:
+    Type: String
+  CCFZipFileName:
+    Type: String
+Resources:
+  BastionCloudCodeFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Runtime: nodejs14.x
+      Role: !Ref CCFRoleArn
+      FunctionName: !Ref CCFName
+      FunctionName: testCCF
+      Handler: index.handler
+      Description: Cloud Code Functions that execute custom tasks
+      TracingConfig:
+        Mode: Active
+      Code:
+        S3Bucket: !Ref CCFBucketName
+        S3Key: !Ref CCFZipFileName
