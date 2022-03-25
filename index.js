@@ -5,13 +5,14 @@ const collectionRoutes = require('./routes/collectionRouter');
 const cloudCodeRoutes = require('./routes/cloudCodeRouter');
 const userRoutes = require('./routes/userRouter');
 const fileRoutes = require('./routes/fileRouter');
-const genericRoutes = require('./routes/genericRouter');
 const { errorMiddleware } = require('./utils/middleware');
 const config = require('./utils/config');
 const app = express();
+const path = require('path');
 const db = require('./db');
 
 app.use(express.json());
+app.use(express.static('build'))
 
 setTimeout(() => {
   db.configureMongo(...config.MONGO_CREDENTIALS);
@@ -27,9 +28,13 @@ app.use('/admin/ccf', cloudCodeRoutes);
 app.use('/admin/users', userRoutes);
 app.use('/admin/files', fileRoutes);
 
-if (config.NODE_ENV !== 'production') {
-  app.use('/', genericRoutes);
-}
+app.get('/*', function(req, res) {
+  res.sendFile(path.join(__dirname, './build/index.html'), function(err) {
+    if (err) {
+      res.status(500).send(err)
+    }
+  })
+});
 
 app.use(errorMiddleware);
 
