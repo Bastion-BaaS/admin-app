@@ -16,9 +16,9 @@ app.use(express.json());
 setTimeout(() => {
   db.configureMongo(...config.MONGO_CREDENTIALS);
   db.setRulePriority();
-}, 10000);
+}, 30000);
 
-router.get('/', (req, res, next) => res.json({ healthcheck: "okay" }));
+app.get('/', (req, res, next) => res.json({ healthcheck: "okay" }));
 
 app.use('/admin/instances', instanceRoutes);
 app.use('/admin/data', dataRoutes);
