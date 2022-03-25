@@ -28,6 +28,8 @@ const createParams = (stackName, apiKey, TemplateBody, stackBucketName) => {
     const TargetGroupName = stackName + 'TargetGroup';
     const ClusterName = stackName + 'Cluster';
     const RoutingPath = `/server/${stackName}/*`;
+    const DBHost = `db.${stackName}`;
+    console.log(DBHost);
 
     newRulePriority()
       .then(rulePriority => resolve({
@@ -93,6 +95,10 @@ const createParams = (stackName, apiKey, TemplateBody, stackBucketName) => {
           {
             ParameterKey: 'ApiKey',
             ParameterValue: apiKey
+          },
+          {
+            ParameterKey: 'DBHost',
+            ParameterValue: DBHost
           },
         ],
         Capabilities: ['CAPABILITY_NAMED_IAM']

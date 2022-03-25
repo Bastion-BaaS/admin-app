@@ -13,8 +13,12 @@ const db = require('./db');
 
 app.use(express.json());
 
-db.configureMongo(...config.MONGO_CREDENTIALS);
-db.setRulePriority();
+setTimeout(() => {
+  db.configureMongo(...config.MONGO_CREDENTIALS);
+  db.setRulePriority();
+}, 30000);
+
+app.get('/', (req, res, next) => res.json({ healthcheck: "okay" }));
 
 app.use('/admin/instances', instanceRoutes);
 app.use('/admin/data', dataRoutes);

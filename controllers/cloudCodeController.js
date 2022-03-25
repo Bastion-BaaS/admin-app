@@ -6,8 +6,9 @@ const ccf = require('../aws/ccf');
 
 const getCloudCodeFunctions = (req, res, next) => {
   const stackName = req.params.stackName;
+
   const url = createURL(stackName, '/ccfs');
-  axios.post(url, request, req.axiosConfig)
+  axios.get(url, req.axiosConfig)
     .then(response => res.status(201).json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
@@ -34,7 +35,6 @@ const createCloudCodeFunction = async (req, res, next) => {
   if (s3Result.error) {
     next(new HttpError(s3Result.error, 500));
   }
-
 
   let lambdaResult = ccf.createLambda(ccfName, ccfBucketName);
   if (lambdaResult?.error) {
@@ -63,9 +63,8 @@ const deleteCloudCodeFunction = (req, res, next) => {
     next(new HttpError(result.error, 500));
   }
 
-  const request = { name: ccfName };
   const url = createURL(stackName, `/ccfs/${ccfName}`);
-  axios.delete(url, request, req.axiosConfig)
+  axios.delete(url, req.axiosConfig)
     .then(response => res.status(201).json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
