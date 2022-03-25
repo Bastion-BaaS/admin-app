@@ -10,16 +10,23 @@ const config = require('./utils/config');
 const app = express();
 const path = require('path');
 const db = require('./db');
+const seed = require('./db/seed');
 
 app.use(express.json());
 app.use(express.static('build'))
 
-setTimeout(() => {
+if (config.NODE_ENV === 'development') {
   db.configureMongo(...config.MONGO_CREDENTIALS);
   db.setRulePriority();
-}, 30000);
+  seed.generate();
+} else {
+  setTimeout(() => {
+    db.configureMongo(...config.MONGO_CREDENTIALS);
+    db.setRulePriority();
+  }, 30000);
+}
 
-app.get('/', (req, res, next) => res.json({ healthcheck: "okay" }));
+// app.get('/', (req, res, next) => res.json({ healthcheck: "okay" }));
 
 app.use('/admin/instances', instanceRoutes);
 app.use('/admin/data', dataRoutes);
