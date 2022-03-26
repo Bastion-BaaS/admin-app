@@ -17,14 +17,9 @@ const seedInstances = [
     ApiKey: 'teststackapikey102'
   },
   {
-    StackName: 'bastion-4',
-    StackId: 'teststackid103',
-    ApiKey: 'teststackapikey103'
-  },
-  {
-    StackName: 'bastion-5',
-    StackId: 'teststackid104',
-    ApiKey: 'teststackapikey104'
+    StackName: 'development',
+    StackId: 'teststackid105',
+    ApiKey: 'teststackapikey105'
   }
 ];
 
