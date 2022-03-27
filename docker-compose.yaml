@@ -23,6 +23,8 @@ services:
       - AppServerLG=development
     depends_on:
       - admin-db
+    networks:
+    - bastionnet
   admin-db:
     image: mongo:5.0.6
     ports:
@@ -30,3 +32,8 @@ services:
     environment:
       - MONGO_INITDB_ROOT_PASSWORD=password
       - MONGO_INITDB_ROOT_USERNAME=admin-app
+    networks:
+    - bastionnet
+networks:
+  bastionnet:
+    name: bastion_network

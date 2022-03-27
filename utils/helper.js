@@ -3,7 +3,7 @@ const HttpError = require('../models/httpError');
 
 const createURL = (stackName, path) => {
   if (process.env.NODE_ENV === 'development') {
-    return `http://localhost:3001/server/${stackName}${path}`;
+    return `http://app-server:3001/server/${stackName}${path}`;
   }
   return `http://app-server.${stackName}:3001/server/${stackName}${path}`;
 };
