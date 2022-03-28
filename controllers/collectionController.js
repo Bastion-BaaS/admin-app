@@ -13,9 +13,9 @@ const getCollections = (req, res, next) => {
 
 const getCollection = (req, res, next) => {
   const stackName = req.params.stackName;
-  const id = req.params.id;
+  const name = req.params.name;
 
-  const url = createURL(stackName, `/collections/${id}`);
+  const url = createURL(stackName, `/collections/${name}`);
   axios.get(url, req.axiosConfig)
     .then(response => res.json(response.data))
     .catch(err => next(new HttpError(err, 500)));
@@ -32,9 +32,9 @@ const createCollection = (req, res, next) => {
 
 const deleteCollection = (req, res, next) => {
   const stackName = req.params.stackName;
-  const id = req.params.id;
+  const name = req.params.name;
 
-  const url = createURL(stackName, `/collections/${id}`);
+  const url = createURL(stackName, `/collections/${name}`);
   axios.delete(url, req.axiosConfig)
     .then(response => res.status(204).json(response.data))
     .catch(err => next(new HttpError(err, 500)));
