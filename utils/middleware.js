@@ -3,7 +3,7 @@ const Instance = require('../models/instance');
 
 const addApiKey = (req, res, next) => {
   const stackName = req.params.stackName;
-  if (process.env.NODE_ENV === 'local') {
+  if (process.env.NODE_ENV === 'development') {
     req.axiosConfig = {
       headers: {
         'Authorization': 'Basic development',

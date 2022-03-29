@@ -1,4 +1,6 @@
 const express = require('express');
+const formData = require('express-form-data');
+const os = require('os');
 const instanceRoutes = require('./routes/instanceRouter');
 const dataRoutes = require('./routes/dataRouter');
 const collectionRoutes = require('./routes/collectionRouter');
@@ -14,6 +16,11 @@ const seed = require('./db/seed');
 
 app.use(express.json());
 app.use(express.static('build'))
+app.use(formData.parse({uploadDir: os.tmpdir(), autoClean: true}));
+app.use(formData.format());
+app.use(formData.stream());
+app.use(formData.union());
+
 
 if (config.NODE_ENV === 'development') {
   db.configureMongo(...config.MONGO_CREDENTIALS);
@@ -25,8 +32,6 @@ if (config.NODE_ENV === 'development') {
     db.setRulePriority();
   }, 30000);
 }
-
-// app.get('/', (req, res, next) => res.json({ healthcheck: "okay" }));
 
 app.use('/admin/instances', instanceRoutes);
 app.use('/admin/data', dataRoutes);
