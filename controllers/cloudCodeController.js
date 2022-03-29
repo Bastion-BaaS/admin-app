@@ -40,24 +40,23 @@ const createCloudCodeFunction = async (req, res, next) => {
     next(new HttpError(err, 500));
   }
 
-  let s3Result;
   try {
-    s3Result = await ccf.uploadZipToS3(ccfBucketName, file, ccfName);
-  } catch(err) {
-    next(new HttpError(err, 500));
+    await ccf.uploadZipToS3(ccfBucketName, ccfName, file);
+  } catch (err) {
+    return next(new HttpError(err, 500));
   }
 
-  let lambdaResult;
   try {
-    lambdaResult = await ccf.createLambda(ccfName, ccfBucketName, roleResult?.Role.Arn);
-  } catch(err) {
-    next(new HttpError(err, 500));
+    await ccf.createLambda(ccfName, ccfBucketName, roleResult?.Role.Arn);
+  } catch (err) {
+    return next(new HttpError(err, 500));
   }
 
-  const request = { name: ccfName };
-  const url = createURL(stackName, '/ccfs/created');
+  const url = createURL(stackName, `/ccfs/${ccfName}/created`);
+  console.log('url: ', url);
+
   try {
-    let response = await axios.post(url, request, req.axiosConfig);
+    let response = await axios.post(url, {}, req.axiosConfig);
     res.status(201).json(response.data);
   } catch(err) {
     next(new HttpError(err, 500));

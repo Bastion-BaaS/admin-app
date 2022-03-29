@@ -21,7 +21,6 @@ app.use(formData.format());
 app.use(formData.stream());
 app.use(formData.union());
 
-
 if (config.NODE_ENV === 'development') {
   db.configureMongo(...config.MONGO_CREDENTIALS);
   db.setRulePriority();

@@ -6,7 +6,7 @@ const iam = new aws.IAM();
 const cloudformation = new aws.CloudFormation();
 const template = fs.readFileSync(path.resolve(__dirname, './CCFTemplate.yaml'), 'utf8');
 
-const getRoleCCFArn = () => {
+const getRoleCCFArn = async () => {
   const params = { RoleName: 'RoleCCF' };
   return iam.getRole(params).promise();
 };
@@ -20,7 +20,7 @@ const uploadZipToS3 = async (bucketName, file, functionName) => {
   return s3.upload(uploadOptions).promise();
 };
 
-const createLambda = (ccfName, ccfBucketName, ccfRole) => {
+const createLambda = async (ccfName, ccfBucketName, ccfRole) => {
   let params = {
     StackName: ccfName,
     Parameters: [
