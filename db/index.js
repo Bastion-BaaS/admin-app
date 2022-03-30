@@ -24,8 +24,7 @@ const setRulePriority = async () => {
       console.log(`Rule priority is checked. It was: ${rulePriority}`);
       result = 'connected';
     } else {
-      // if no rule priority exists, make one with value of 2
-      await RulePriority.create({ Current: 2 })
+      await RulePriority.create({ Current: 1 })
       console.log('Rule priority is set');
       result = 'connected';
     }

@@ -11,10 +11,8 @@ const AppTierSubnet = process.env.AppTierSubnet;
 const EFSSecurityGroup = process.env.EFSSecurityGroup;
 const SGAppServer = process.env.SGAppServer;
 const SGDBServer = process.env.SGDBServer;
-const AppServerIAMRole = process.env.AppServerIAMRole;
-const DBServerIAMRole = process.env.DBServerIAMRole;
-const AppServerIAMRoleArn = process.env.AppServerIAMRoleArn;
-const DBServerIAMRoleArn = process.env.DBServerIAMRoleArn;
+const RoleAppServer = process.env.RoleAppServer;
+const RoleDBServer = process.env.RoleDBServer;
 const ALBListener = process.env.ALBListener;
 const AppServerLG = process.env.AppServerLG;
 const APP_SERVER_PARAMS = {
@@ -27,12 +25,10 @@ const APP_SERVER_PARAMS = {
   EFSSecurityGroup,
   SGAppServer,
   SGDBServer,
-  AppServerIAMRole,
-  DBServerIAMRole,
-  AppServerIAMRoleArn,
-  DBServerIAMRoleArn,
+  RoleAppServer,
+  RoleDBServer,
   ALBListener,
-  AppServerLG,
+  AppServerLG
 };
 
 const MONGO_CREDENTIALS = [

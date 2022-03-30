@@ -23,7 +23,7 @@ Parameters:
     Type: String
   ListenerRulePriority:
     Type: Number 
-    Default: 2
+    Default: 1
   TargetGroupName:
     Type: String 
     Default: AppServerTargetGroup
@@ -40,6 +40,10 @@ Parameters:
     Default: 'xxxxxxxxxxxxxxxxxxxxx'
   DBHost:
     Type: String
+  AppTaskFamily:
+    Type: String
+  DBTaskFamily:
+    Type: String
 Resources:
   BaaSECSCluster:
     Type: 'AWS::ECS::Cluster'
@@ -47,6 +51,12 @@ Resources:
       CapacityProviders:
         - FARGATE
       ClusterName: !Ref ClusterName
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Tags:
+        - Key: stack
+          Value: Bastion
   AppServerECSService:
     Type: 'AWS::ECS::Service'
     Properties:
@@ -83,6 +93,7 @@ Resources:
   AppServerTask:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
+      Family: !Ref AppTaskFamily
       NetworkMode: awsvpc
       ExecutionRoleArn: !GetAtt 
         - AppServerTaskRole
@@ -185,6 +196,7 @@ Resources:
   DatabaseTask:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
+      Family: !Ref DBTaskFamily
       NetworkMode: awsvpc
       ExecutionRoleArn: !GetAtt 
         - DatabaseTaskRole
