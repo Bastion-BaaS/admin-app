@@ -15,7 +15,6 @@ Resources:
       Runtime: nodejs14.x
       Role: !Ref CCFRoleArn
       FunctionName: !Ref CCFName
-      FunctionName: testCCF
       Handler: index.handler
       Description: Cloud Code Functions that execute custom tasks
       TracingConfig:

@@ -11,7 +11,11 @@ const instanceSchema = new mongoose.Schema({
   },
   ApiKey: {
     type: String,
-    require: [true, 'The AppId is required']
+    require: [true, 'The ApiKey is required']
+  },
+  BucketName: {
+    type: String,
+    require: [true, 'The BucketName is required']
   },
 }, {timestamps: true});
 
