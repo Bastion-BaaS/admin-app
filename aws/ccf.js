@@ -11,7 +11,7 @@ const getRoleCCFArn = async () => {
   return iam.getRole(params).promise();
 };
 
-const uploadZipToS3 = async (bucketName, file, functionName) => {
+const uploadZipToS3 = async (bucketName, functionName, file) => {
   const uploadOptions = {
     Bucket: bucketName,
     Key: `ccf/${functionName}.zip`,

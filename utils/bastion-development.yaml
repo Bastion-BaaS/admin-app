@@ -98,7 +98,7 @@ Resources:
       ContainerDefinitions:
         - Name: app-server
           Essential: 'true'
-          Image: 'public.ecr.aws/k2f8i0u8/app-server:0.9.7'
+          Image: 'public.ecr.aws/k2f8i0u8/app-server:0.9.11'
           PortMappings:
             - ContainerPort: 3001
               HostPort: 3001
@@ -115,6 +115,8 @@ Resources:
               Value: !Ref StackName
             - Name: DB_HOST
               Value: !Ref DBHost
+            - Name: stackBucketName
+              Value: !Ref StackBucketName
     DependsOn:
       - BaaSECSCluster
       - AppServerTaskRole
