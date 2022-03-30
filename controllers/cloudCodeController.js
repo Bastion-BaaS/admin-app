@@ -53,7 +53,6 @@ const createCloudCodeFunction = async (req, res, next) => {
   }
 
   const url = createURL(stackName, `/ccfs/${ccfName}/created`);
-  console.log('url: ', url);
 
   try {
     let response = await axios.post(url, {}, req.axiosConfig);
