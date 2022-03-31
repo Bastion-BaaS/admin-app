@@ -22,6 +22,8 @@ services:
       - DBServerIAMRoleArn=development
       - ALBListener=development
       - AppServerLG=development
+      - AdminUsername=development
+      - AdminPassword=development
     depends_on:
       - admin-db
     networks:
