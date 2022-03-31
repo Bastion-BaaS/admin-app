@@ -106,7 +106,7 @@ Resources:
       ContainerDefinitions:
         - Name: app-server
           Essential: 'true'
-          Image: 'public.ecr.aws/k2f8i0u8/app-server:0.9.11'
+          Image: 'public.ecr.aws/k2f8i0u8/app-server:0.10.7'
           PortMappings:
             - ContainerPort: 3001
               HostPort: 3001
