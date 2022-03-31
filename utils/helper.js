@@ -1,5 +1,6 @@
 const RulePriority = require('../models/listenerRulesPriority');
 const HttpError = require('../models/httpError');
+const config = require('./config');
 
 const createURL = (stackName, path) => {
   if (process.env.NODE_ENV === 'development') {
@@ -27,9 +28,11 @@ const createParams = (stackName, apiKey, TemplateBody, stackBucketName) => {
   return new Promise((resolve, reject) => {
     const TargetGroupName = stackName + 'TargetGroup';
     const ClusterName = stackName + 'Cluster';
+    const AppTaskFamily = stackName + 'TaskApp';
+    const DBTaskFamily = stackName + 'TaskDB';
     const RoutingPath = `/server/${stackName}/*`;
     const DBHost = `db.${stackName}`;
-    console.log(DBHost);
+    const stackParams = config.APP_SERVER_PARAMS
 
     newRulePriority()
       .then(rulePriority => resolve({
@@ -38,35 +41,35 @@ const createParams = (stackName, apiKey, TemplateBody, stackBucketName) => {
         Parameters: [
           {
             ParameterKey: 'VPCID',
-            ParameterValue: process.env.VpcId
+            ParameterValue: stackParams.VpcId
           },
           {
             ParameterKey: 'AppTierSubnet',
-            ParameterValue: process.env.AppTierSubnet
+            ParameterValue: stackParams.AppTierSubnet
           },
           {
             ParameterKey: 'DBTierSubnet',
-            ParameterValue: process.env.DBTierSubnet
+            ParameterValue: stackParams.DBTierSubnet
           },
           {
             ParameterKey: 'EFSSecurityGroup',
-            ParameterValue: process.env.EFSSecurityGroup
+            ParameterValue: stackParams.EFSSecurityGroup
           },
           {
             ParameterKey: 'SGAppServer',
-            ParameterValue: process.env.SGAppServer
+            ParameterValue: stackParams.SGAppServer
           },
           {
             ParameterKey: 'ALBListener',
-            ParameterValue: process.env.ALBListener
+            ParameterValue: stackParams.ALBListener
           },
           {
             ParameterKey: 'SGDBServer',
-            ParameterValue: process.env.SGDBServer
+            ParameterValue: stackParams.SGDBServer
           },
           {
             ParameterKey: 'AppServerLG',
-            ParameterValue: process.env.AppServerLG
+            ParameterValue: stackParams.AppServerLG
           },
           {
             ParameterKey: 'ListenerRulePriority',
@@ -100,6 +103,22 @@ const createParams = (stackName, apiKey, TemplateBody, stackBucketName) => {
             ParameterKey: 'DBHost',
             ParameterValue: DBHost
           },
+          {
+            ParameterKey: 'RoleAppServer',
+            ParameterValue: stackParams.RoleAppServer
+          },
+          {
+            ParameterKey: 'RoleDBServer',
+            ParameterValue: stackParams.RoleDBServer
+          },
+          {
+            ParameterKey: 'AppTaskFamily',
+            ParameterValue: AppTaskFamily
+          },
+          {
+            ParameterKey: 'DBTaskFamily',
+            ParameterValue: DBTaskFamily
+          }
         ],
         Capabilities: ['CAPABILITY_NAMED_IAM']
       }))

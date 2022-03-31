@@ -8,7 +8,7 @@ const cloudformation = new aws.CloudFormation();
 const Instance = require('../models/instance');
 const HttpError = require('../models/httpError');
 const { createParams, isValidStackName } = require('../utils/helper');
-const TemplateBody = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-development.yaml'), 'utf8');
+const TemplateBody = fs.readFileSync(path.resolve(__dirname, '../utils/bastion-production.yaml'), 'utf8');
 
 const createBaaS = (req, res, next) => {
   const stackName = req.body?.name;
