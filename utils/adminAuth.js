@@ -46,7 +46,7 @@ const checkAuthenticated = (req, res, next) => {
   if (req.isAuthenticated() || config.NODE_ENV !== 'production') {
     next();
   } else {
-    res.status(403).json({ message: 'Unauthorized' });
+    res.status(403).json({ message: 'Unauthorized user' });
   }
 };
 

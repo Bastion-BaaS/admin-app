@@ -28,7 +28,22 @@ const logout = (req, res, next) => {
   res.status(200).json({ message: `Admin user with username: ${user.username} has logged out`});
 };
 
+const check = (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (!user) {
+      return res.json(403, { message: 'No user found' });
+    }
+    
+    return res.json({ message: 'Logged in' });
+  })(req, res, next);
+};
+
 module.exports = {
   login,
   logout,
+  check
 }
