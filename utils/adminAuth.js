@@ -20,7 +20,8 @@ const sessionConfig = (() => {
 })();
 
 const validate = async (name, password, done) => {
-  const [ username, adminPassword ] = config.ADMIN_CREDENTIALS;
+  const username = config.ADMIN_CREDENTIALS.AdminUsername;
+  const adminPassword = config.ADMIN_CREDENTIALS.AdminPassword;
   if (name !== username) { 
     return done(null, false, { message: 'No user found' }); 
   }
@@ -37,7 +38,7 @@ const serialize = (user, done) => {
 };
 
 const deserialize = async (username, done) => {
-  const [ user ] = config.ADMIN_CREDENTIALS;
+  const user = config.ADMIN_CREDENTIALS.AdminUsername;
   return done(null, { username: user });
 };
 
