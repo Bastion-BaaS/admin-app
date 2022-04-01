@@ -38,8 +38,7 @@ const MONGO_CREDENTIALS = [
   _DB_PASSWORD,
   _DB_HOST,
   _DB_PORT,
-  _DB_NAME,
-  NODE_ENV
+  _DB_NAME
 ];
 
 const ADMIN_CREDENTIALS = {

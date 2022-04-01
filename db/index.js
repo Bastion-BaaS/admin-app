@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const RulePriority = require('../models/listenerRulesPriority');
+const config = require('../utils/config');
 
-const configureMongo = (env, user, password, host, port, dbName) => {
-  if (env === 'production') {
+const configureMongo = (user, password, host, port, dbName) => {
+  if (config.NODE_ENV === 'production') {
     mongoose.set('debug', { color: false, shell: true });
   } else {
     mongoose.set('debug', { color: true, shell: true });

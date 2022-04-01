@@ -13,6 +13,7 @@
   "dependencies": {
     "aws-sdk": "^2.1090.0",
     "axios": "^0.26.1",
+    "connect-mongo": "^4.6.0",
     "crypto": "^1.0.1",
     "express": "^4.17.3",
     "express-form-data": "^2.0.17",
