@@ -64,9 +64,6 @@ Resources:
     Properties:
       Cluster: !Ref BaaSECSCluster
       DesiredCount: 1
-      DeploymentConfiguration:
-        MaximumPercent: 100
-        MinimumHealthyPercent: 0
       TaskDefinition: !Ref AppServerTask
       LaunchType: FARGATE
       ServiceRegistries:
@@ -77,7 +74,7 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: DISABLED
           Subnets:
-            -  !Ref AppTierSubnet
+            - !Ref AppTierSubnet
           SecurityGroups:
             - !Ref SGAppServer
       LoadBalancers:
@@ -132,9 +129,6 @@ Resources:
     Properties:
       Cluster: !Ref BaaSECSCluster
       DesiredCount: 1
-      DeploymentConfiguration:
-        MaximumPercent: 100
-        MinimumHealthyPercent: 0
       TaskDefinition: !Ref DatabaseTask
       LaunchType: FARGATE
       ServiceRegistries:
@@ -145,7 +139,7 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: DISABLED
           Subnets:
-            - !Ref AppTierSubnet
+            - !Ref DBTierSubnet
           SecurityGroups:
             - !Ref SGDBServer
     DependsOn:
@@ -232,7 +226,7 @@ Resources:
       FileSystemId: !Ref InstanceEFS
       SecurityGroups:
         - !Ref EFSSecurityGroup
-      SubnetId: !Ref AppTierSubnet
+      SubnetId: !Ref DBTierSubnet
     DependsOn:
       - InstanceEFS
   AppServerTargetGroup:
