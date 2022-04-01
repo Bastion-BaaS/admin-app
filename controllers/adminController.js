@@ -29,17 +29,8 @@ const logout = (req, res, next) => {
 };
 
 const check = (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-
-    if (!user) {
-      return res.json(403, { message: 'No user found' });
-    }
-    
-    return res.json({ message: 'Logged in' });
-  })(req, res, next);
+  const user = req.user;
+  return res.json({ message: `${user.username} logged in` });
 };
 
 module.exports = {
