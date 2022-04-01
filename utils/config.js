@@ -15,6 +15,8 @@ const RoleAppServer = process.env.RoleAppServer;
 const RoleDBServer = process.env.RoleDBServer;
 const ALBListener = process.env.ALBListener;
 const AppServerLG = process.env.AppServerLG;
+const AdminUsername = process.env.AdminUsername;
+const AdminPassword = process.env.AdminPassword;
 const APP_SERVER_PARAMS = {
   VpcId,
   DBTierSubnet,
@@ -32,7 +34,6 @@ const APP_SERVER_PARAMS = {
 };
 
 const MONGO_CREDENTIALS = [
-  NODE_ENV,
   _DB_USER,
   _DB_PASSWORD,
   _DB_HOST,
@@ -40,9 +41,15 @@ const MONGO_CREDENTIALS = [
   _DB_NAME
 ];
 
+const ADMIN_CREDENTIALS = {
+  AdminUsername,
+  AdminPassword
+}
+
 module.exports = {
   PORT,
   NODE_ENV,
   MONGO_CREDENTIALS,
   APP_SERVER_PARAMS,
+  ADMIN_CREDENTIALS
 };
