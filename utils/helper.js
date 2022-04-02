@@ -88,8 +88,12 @@ const createParams = (stackName, apiKey, TemplateBody, stackBucketName) => {
             ParameterValue: stackName
           },
           {
-            ParameterKey: 'StackBucketName',
-            ParameterValue: stackBucketName
+            ParameterKey: 'StackFileBucketName',
+            ParameterValue: `${stackBucketName}-files`
+          },
+          {
+            ParameterKey: 'StackCCFBucketName',
+            ParameterValue: `${stackBucketName}-ccfs`
           },
           {
             ParameterKey: 'RoutingPath',
