@@ -29,7 +29,8 @@ const createBaaS = (req, res, next) => {
           StackName: stackName,
           StackId: data.StackId,
           ApiKey: apiKey,
-          BucketName: bucketName,
+          CCFBucketName: `${bucketName}-ccfs`,
+          FileBucketName: `${bucketName}-files`,
         }
 
         Instance.create(newInstance)

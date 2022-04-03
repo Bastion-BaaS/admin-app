@@ -19,7 +19,9 @@ Parameters:
     Type: String
   StackName:
     Type: String
-  StackBucketName:
+  StackFileBucketName:
+    Type: String
+  StackCCFBucketName:
     Type: String
   ListenerRulePriority:
     Type: Number 
@@ -128,6 +130,10 @@ Resources:
               Value: !Ref DBHost
             - Name: stackBucketName
               Value: !Ref StackBucketName
+            - Name: StackFileBucketName
+              Value: !Ref StackFileBucketName
+            - Name: StackCCFBucketName
+              Value: !Ref StackCCFBucketName
     DependsOn:
       - BaaSECSCluster
       - AppServerTaskRole

@@ -31,7 +31,7 @@ const createCloudCodeFunction = async (req, res, next) => {
     next(new HttpError(err, 500))
   }
   // Hard code a bucket name for testing
-  const ccfBucketName = instanceObj.BucketName;
+  const ccfBucketName = instanceObj.CCFBucketName;
 
   let roleResult;
   try {
@@ -74,7 +74,7 @@ const deleteCloudCodeFunction = async (req, res, next) => {
   }
 
   // For testing use a hard coded bucket name
-  const ccfBucketName = instanceObj.BucketName;
+  const ccfBucketName = instanceObj.CCFBucketName;
 
   let result
   try {

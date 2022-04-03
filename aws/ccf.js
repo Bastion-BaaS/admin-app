@@ -14,7 +14,7 @@ const getRoleCCFArn = async () => {
 const uploadZipToS3 = async (bucketName, functionName, file) => {
   const uploadOptions = {
     Bucket: bucketName,
-    Key: `ccf/${functionName}.zip`,
+    Key: `${functionName}.zip`,
     Body: file,
   }
   return s3.upload(uploadOptions).promise();
@@ -34,7 +34,7 @@ const createLambda = async (ccfName, ccfBucketName, ccfRole) => {
       },
       {
         ParameterKey: 'CCFZipFileName',
-        ParameterValue: `ccf/${ccfName}.zip`,
+        ParameterValue: `${ccfName}.zip`,
       },
       {
         ParameterKey: 'CCFRoleArn',
@@ -54,7 +54,7 @@ const removeLambda = async (ccfName, ccfBucketName) => {
   };
   let s3Params = {
     Bucket: ccfBucketName,
-    Key: `ccf/${ccfName}.zip`,
+    Key: `${ccfName}.zip`,
   }
   try {
     await s3.deleteObject(s3Params).promise();
