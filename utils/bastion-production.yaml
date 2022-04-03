@@ -271,6 +271,14 @@ Resources:
         BlockPublicPolicy: false
         IgnorePublicAcls: false
         RestrictPublicBuckets: false
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+            AllowedOrigins:
+              - '*'
   StackCCFBucket:
     Type: 'AWS::S3::Bucket'
     Description: S3 Bucket for Cloud Code Function zip files
