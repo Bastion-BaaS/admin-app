@@ -237,7 +237,7 @@ Resources:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
     Properties:
       VpcId: !Ref VPCID
-      Name: AppServerTargetGroup
+      Name: !Ref TargetGroupName
       HealthCheckEnabled: true
       Port: 3001
       Protocol: HTTP
