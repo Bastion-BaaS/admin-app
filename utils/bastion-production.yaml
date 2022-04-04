@@ -105,7 +105,7 @@ Resources:
       ContainerDefinitions:
         - Name: app-server
           Essential: 'true'
-          Image: 'public.ecr.aws/k2f8i0u8/app-server:0.10.7'
+          Image: 'public.ecr.aws/k2f8i0u8/app-server:0.10.17'
           PortMappings:
             - ContainerPort: 3001
               HostPort: 3001
@@ -279,6 +279,22 @@ Resources:
               - GET
             AllowedOrigins:
               - '*'
+  FileBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StackFileBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:GetObject'
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref StackFileBucket
+                - /*
+            Principal: '*'
   StackCCFBucket:
     Type: 'AWS::S3::Bucket'
     Description: S3 Bucket for Cloud Code Function zip files

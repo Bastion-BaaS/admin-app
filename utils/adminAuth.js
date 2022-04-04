@@ -6,6 +6,7 @@ const sessionConfig = (() => {
   const connectionURL = `mongodb://${user}:${password}@${host}:${port}/sessionData?authSource=admin`
 
   return { 
+    name: 'admin-cookie',
     secret: 'bastion is great',
     resave: false,
     saveUninitialized: true,
