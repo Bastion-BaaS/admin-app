@@ -292,7 +292,7 @@ Resources:
             Resource: !Join
               - ''
               - - 'arn:aws:s3:::'
-                - !Ref DOC-EXAMPLE-BUCKET
+                - !Ref StackFileBucket
                 - /*
             Principal: '*'
   StackCCFBucket:
