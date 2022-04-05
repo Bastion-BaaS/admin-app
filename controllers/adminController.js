@@ -8,7 +8,7 @@ const login = (req, res, next) => {
     }
 
     if (!user) {
-      return res.json(403, { message: 'No user found' });
+      return res.json(403, { message: 'Unable to authenticate' });
     }
 
     req.login(user, err => {
