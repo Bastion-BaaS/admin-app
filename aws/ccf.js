@@ -5,6 +5,8 @@ const s3 = new aws.S3();
 const iam = new aws.IAM();
 const cloudformation = new aws.CloudFormation();
 const template = fs.readFileSync(path.resolve(__dirname, './CCFTemplate.yaml'), 'utf8');
+const config = require('../utils/config');
+const stackParams = config.APP_SERVER_PARAMS;
 
 const getRoleCCFArn = async () => {
   const params = { RoleName: 'RoleCCF' };
@@ -39,6 +41,18 @@ const createLambda = async (ccfName, ccfBucketName, ccfRole) => {
       {
         ParameterKey: 'CCFRoleArn',
         ParameterValue: ccfRole
+      },
+      {
+        ParameterKey: 'AppTierSubnet',
+        ParameterValue: stackParams.AppTierSubnet
+      },
+      {
+        ParameterKey: 'DBTierSubnet',
+        ParameterValue: stackParams.DBTierSubnet
+      },
+      {
+        ParameterKey: 'SGCCF',
+        ParameterValue: stackParams.SGCCF
       }
     ],
     TemplateBody: template,

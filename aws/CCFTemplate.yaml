@@ -8,6 +8,12 @@ Parameters:
     Type: String
   CCFZipFileName:
     Type: String
+  AppTierSubnet:
+    Type: String
+  DBTierSubnet:
+    Type: String
+  SGCCF:
+    Type: String
 Resources:
   BastionCloudCodeFunction:
     Type: 'AWS::Lambda::Function'
@@ -22,3 +28,9 @@ Resources:
       Code:
         S3Bucket: !Ref CCFBucketName
         S3Key: !Ref CCFZipFileName
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SGCCF
+        SubnetIds:
+          - !Ref AppTierSubnet
+          - !Ref DBTierSubnet

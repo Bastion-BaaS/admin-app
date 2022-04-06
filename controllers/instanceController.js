@@ -68,7 +68,13 @@ const getBaaSInstances = (req, res, next) => {
 const getBaaSInstance = (req, res, next) => {
   const stackName = req.params.stackName;
   Instance.findOne({ StackName: stackName })
-    .then(instance => res.status(200).json(instance))
+    .then(instance => {
+      if (!instance) {
+        next(new HttpError('Instance not found', 404));
+      } else {
+        res.status(200).json(instance)
+      }
+    })
     .catch(err => next(new HttpError(err, 500)));
 };
 

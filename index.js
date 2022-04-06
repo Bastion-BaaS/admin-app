@@ -45,12 +45,12 @@ if (config.NODE_ENV === 'development') {
   }, 30000);
 }
 
-app.use('/admin/instances', instanceRoutes);
-app.use('/admin/data', dataRoutes);
-app.use('/admin/collections', collectionRoutes);
-app.use('/admin/ccf', cloudCodeRoutes);
-app.use('/admin/users', userRoutes);
-app.use('/admin/files', fileRoutes);
+app.use('/admin/instances', adminAuth.checkAuthenticated, instanceRoutes);
+app.use('/admin/data', adminAuth.checkAuthenticated, dataRoutes);
+app.use('/admin/collections', adminAuth.checkAuthenticated, collectionRoutes);
+app.use('/admin/ccf', adminAuth.checkAuthenticated, cloudCodeRoutes);
+app.use('/admin/users', adminAuth.checkAuthenticated, userRoutes);
+app.use('/admin/files', adminAuth.checkAuthenticated, fileRoutes);
 app.use('/admin', adminRouter);
 
 app.get('/*', function(req, res) {
