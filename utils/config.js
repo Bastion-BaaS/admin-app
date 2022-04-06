@@ -15,13 +15,11 @@ const RoleAppServer = process.env.RoleAppServer;
 const RoleDBServer = process.env.RoleDBServer;
 const ALBListener = process.env.ALBListener;
 const AppServerLG = process.env.AppServerLG;
+const SGCCF = process.env.SGCCF;
 const AdminUsername = process.env.AdminUsername;
 const AdminPassword = process.env.AdminPassword;
 const APP_SERVER_PARAMS = {
   VpcId,
-  DBTierSubnet,
-  AppTierSubnet,
-  EFSSecurityGroup,
   DBTierSubnet,
   AppTierSubnet,
   EFSSecurityGroup,
@@ -30,7 +28,8 @@ const APP_SERVER_PARAMS = {
   RoleAppServer,
   RoleDBServer,
   ALBListener,
-  AppServerLG
+  AppServerLG,
+  SGCCF
 };
 
 const MONGO_CREDENTIALS = [
