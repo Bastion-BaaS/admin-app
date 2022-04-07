@@ -22,7 +22,7 @@ describe('Data actions', () => {
         stackName: 'bastion-1',
         name: 'collection-3'
       }
-    ]
+    ];
 
     mockRequest = {
       params: { stackName: 'bastion-1' },
@@ -37,7 +37,7 @@ describe('Data actions', () => {
   
     mockResponse = {
       json: function(data) {
-        return data
+        return data;
       },
       status: function(s) {
         this.statusCode = s;
