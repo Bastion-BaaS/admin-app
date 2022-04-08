@@ -60,19 +60,19 @@ const destroyBaaS = (req, res, next) => {
 };
 
 const getBaaSInstances = (req, res, next) => {
-  Instance.find({})
+  return Instance.find({})
     .then(instances => res.json(instances))
     .catch(err => next(new HttpError(err, 500)));
 };
 
 const getBaaSInstance = (req, res, next) => {
   const stackName = req.params.stackName;
-  Instance.findOne({ StackName: stackName })
+  return Instance.findOne({ StackName: stackName })
     .then(instance => {
       if (!instance) {
         next(new HttpError('Instance not found', 404));
       } else {
-        res.status(200).json(instance)
+        return res.status(200).json(instance)
       }
     })
     .catch(err => next(new HttpError(err, 500)));
