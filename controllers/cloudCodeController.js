@@ -10,7 +10,7 @@ const getCloudCodeFunctions = async (req, res, next) => {
   const url = createURL(stackName, '/ccfs');
   try {
     let response = await axios.get(url, req.axiosConfig);
-    res.status(201).json(response.data);
+    return res.status(200).json(response.data);
   } catch(err) {
     next(new HttpError(err, 500));
   }

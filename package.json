@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
     "local": "NODE_ENV=local nodemon index.js"
   },
   "author": "",
@@ -26,6 +26,10 @@
     "path": "^0.12.7"
   },
   "devDependencies": {
-    "nodemon": "^2.0.15"
+    "cross-env": "^7.0.3",
+    "jest": "^27.5.1",
+    "mockingoose": "^2.15.2",
+    "nodemon": "^2.0.15",
+    "supertest": "^6.2.2"
   }
 }

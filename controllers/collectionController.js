@@ -6,7 +6,7 @@ const getCollections = (req, res, next) => {
   const stackName = req.params.stackName;
 
   const url = createURL(stackName, '/collections');
-  axios.get(url, req.axiosConfig)
+  return axios.get(url, req.axiosConfig)
     .then(response => res.json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
@@ -16,7 +16,7 @@ const getCollection = (req, res, next) => {
   const name = req.params.name;
 
   const url = createURL(stackName, `/collections/${name}`);
-  axios.get(url, req.axiosConfig)
+  return axios.get(url, req.axiosConfig)
     .then(response => res.json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
@@ -25,7 +25,7 @@ const createCollection = (req, res, next) => {
   const stackName = req.params.stackName;
 
   const url = createURL(stackName, '/collections');
-  axios.post(url, req.body, req.axiosConfig)
+  return axios.post(url, req.body, req.axiosConfig)
     .then(response => res.status(201).json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 }
@@ -35,7 +35,7 @@ const deleteCollection = (req, res, next) => {
   const name = req.params.name;
 
   const url = createURL(stackName, `/collections/${name}`);
-  axios.delete(url, req.axiosConfig)
+  return axios.delete(url, req.axiosConfig)
     .then(response => res.status(204).json(response.data))
     .catch(err => next(new HttpError(err, 500)));
 };
